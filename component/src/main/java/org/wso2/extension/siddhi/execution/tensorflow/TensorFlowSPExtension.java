@@ -189,7 +189,8 @@ public class TensorFlowSPExtension extends StreamProcessor {
         }
 
         //loading the saved model
-        SavedModelBundle tensorFlowSavedModel = SavedModelBundle.load(modelPath, "serve");
+        final String SERVING_TAG = "serve";
+        SavedModelBundle tensorFlowSavedModel = SavedModelBundle.load(modelPath, SERVING_TAG);
         tensorFlowSession = tensorFlowSavedModel.session();
 
         //expressionExecutors[1] --> noOfInputs
@@ -199,6 +200,10 @@ public class TensorFlowSPExtension extends StreamProcessor {
         }
         if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
             noOfInputs = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
+            if (noOfInputs < 1) {
+                throw new SiddhiAppCreationException("Number of inputs should be at least 1 but given as " +
+                        noOfInputs);
+            }
         } else {
             throw new SiddhiAppCreationException("2nd query parameter is number of inputs which has to be of type " +
                     "int but found " + attributeExpressionExecutors[1].getReturnType());
@@ -214,6 +219,10 @@ public class TensorFlowSPExtension extends StreamProcessor {
         }
         if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.INT) {
             noOfOutputs = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[2]).getValue();
+            if (noOfOutputs < 1) {
+                throw new SiddhiAppCreationException("Number of outputs should be at least 1 but given as " +
+                        noOfOutputs);
+            }
         } else {
             throw new SiddhiAppCreationException("3rd query parameter is number of outputs which has to be of type " +
                     "int but found " + attributeExpressionExecutors[2].getReturnType());
@@ -244,7 +253,7 @@ public class TensorFlowSPExtension extends StreamProcessor {
                         attributeExpressionExecutors[index]).getValue();
             } else {
                 throw new SiddhiAppCreationException("The query parameter of index " + (index + 1) + " is a input " +
-                        "name which has to be a constant but found " +
+                        "name which has to be a String but found " +
                         this.attributeExpressionExecutors[index].getReturnType());
             }
         }
@@ -262,17 +271,18 @@ public class TensorFlowSPExtension extends StreamProcessor {
                         attributeExpressionExecutors[index]).getValue();
             } else {
                 throw new SiddhiAppCreationException("The query parameter of index " + (index + 1) + " is a output " +
-                        "name which has to be a constant but found " +
+                        "name which has to be a String but found " +
                         this.attributeExpressionExecutors[index].getReturnType());
             }
         }
 
         //Checking whether the node names are present in the signature def
         final SignatureDef signatureDef;
+        final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = "serving_default";
         try {
             signatureDef =
                     MetaGraphDef.parseFrom(tensorFlowSavedModel.metaGraphDef())
-                            .getSignatureDefOrThrow("serving_default");
+                            .getSignatureDefOrThrow(DEFAULT_SERVING_SIGNATURE_DEF_KEY);
         } catch (InvalidProtocolBufferException e) {
             throw new SiddhiAppCreationException("Error while reading signature def." + e.getMessage());
         }
@@ -286,7 +296,7 @@ public class TensorFlowSPExtension extends StreamProcessor {
 
         for (String outputNodeName: outputNamesArray) {
             if (!(isNodePresent(signatureDef.getOutputsMap(), outputNodeName))) {
-                throw new SiddhiAppCreationException(outputNodeName + " not present in the signature def. please " +
+                throw new SiddhiAppCreationException(outputNodeName + " not present in the signature def. Please " +
                         "check the output node names.");
             }
         }
