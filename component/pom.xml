@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow</artifactId>
-            <version>1.3.0</version>
+            <version>1.3.0</version> //todo: define in parent pom and refer here
         </dependency>
         <dependency>
             <groupId>org.tensorflow</groupId>
@@ -130,7 +130,7 @@
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
-                        </Include-Resource>
+                        </Include-Resource> //todo: refer gpl pom and edit to include private packages of proto and tensrflow
                     </instructions>
                 </configuration>
             </plugin>

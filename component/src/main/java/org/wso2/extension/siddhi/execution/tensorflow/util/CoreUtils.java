@@ -34,6 +34,7 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,11 +76,11 @@ public class CoreUtils {
             } else {
 
                 Shape outputShape = tensorFlowSavedModel.graph().operation(outputNamesArray[i]).output(0).shape();
-
+                //todo: try to find data type without getting zeroth output
                 //Finding the total number of elements
                 int numElements = 1;
 
-                for (int k = 0; k < outputShape.numDimensions(); k++) {
+                for (int k = 0; k < outputShape.numDimensions(); k++) { //todo: get the number of elements from the signature def
                     if (outputShape.size(k) == -1) {
                         continue;
                     }
@@ -87,7 +88,7 @@ public class CoreUtils {
                 }
 
                 for (int j = 0; j < numElements; j++) {
-                    if (outputDataType == DataType.FLOAT) {
+                    if (outputDataType == DataType.FLOAT) { //todo: use switch case?
                         attributeList.add(new Attribute(outputNamesArray[i] + j, Attribute.Type.FLOAT));
 
                     } else if (outputDataType == DataType.BOOL) {
@@ -111,65 +112,65 @@ public class CoreUtils {
     public static Object[] getOutputObjectArray(List<Tensor> outputTensorList) {
         List<Object> objectList = new LinkedList<>();
 
-        for (int i = 0; i < outputTensorList.size(); i++) {
+        for (Tensor outputTensor : outputTensorList) {
 
-            DataType tensorDataType = outputTensorList.get(i).dataType();
+            DataType tensorDataType = outputTensor.dataType();
 
             if (tensorDataType == DataType.FLOAT) {
-                FloatBuffer floatBuffer = FloatBuffer.allocate(outputTensorList.get(i).numElements());
-                outputTensorList.get(i).writeTo(floatBuffer);
+                FloatBuffer floatBuffer = FloatBuffer.allocate(outputTensor.numElements());
+                outputTensor.writeTo(floatBuffer);
                 float[] floatArray = floatBuffer.array();
 
-                for (float value: floatArray) {
+                for (float value : floatArray) { //todo: use collections api and try to add without iterating
                     objectList.add(value);
                 }
 
             } else if (tensorDataType == DataType.DOUBLE) {
-                DoubleBuffer doubleBuffer = DoubleBuffer.allocate(outputTensorList.get(i).numElements());
-                outputTensorList.get(i).writeTo(doubleBuffer);
+                DoubleBuffer doubleBuffer = DoubleBuffer.allocate(outputTensor.numElements());
+                outputTensor.writeTo(doubleBuffer);
                 double[] doubleArray = doubleBuffer.array();
 
-                for (double value: doubleArray) {
+                for (double value : doubleArray) {
                     objectList.add(value);
                 }
 
             } else if (tensorDataType == DataType.INT32) {
-                IntBuffer intBuffer = IntBuffer.allocate(outputTensorList.get(i).numElements());
-                outputTensorList.get(i).writeTo(intBuffer);
+                IntBuffer intBuffer = IntBuffer.allocate(outputTensor.numElements());
+                outputTensor.writeTo(intBuffer);
                 int[] intArray = intBuffer.array();
 
-                for (int value: intArray) {
+                for (int value : intArray) {
                     objectList.add(value);
                 }
 
             } else if (tensorDataType == DataType.INT64) {
-                LongBuffer longBuffer = LongBuffer.allocate(outputTensorList.get(i).numElements());
-                outputTensorList.get(i).writeTo(longBuffer);
+                LongBuffer longBuffer = LongBuffer.allocate(outputTensor.numElements());
+                outputTensor.writeTo(longBuffer);
                 long[] longArray = longBuffer.array();
 
-                for (long value: longArray) {
+                for (long value : longArray) {
                     objectList.add(value);
                 }
 
             } else {
-                ByteBuffer byteBuffer = ByteBuffer.allocate(outputTensorList.get(i).numBytes());
-                outputTensorList.get(i).writeTo(byteBuffer);
+                ByteBuffer byteBuffer = ByteBuffer.allocate(outputTensor.numBytes());
+                outputTensor.writeTo(byteBuffer);
                 byte[] byteArray = byteBuffer.array();
 
                 if (tensorDataType == DataType.STRING) {
-                    try {
-                        String recoveredString = new String(byteArray, "UTF-8");
+//                    try {
+                        String recoveredString = new String(byteArray, Charset.); //todo: use charset const
                         objectList.add(recoveredString);
-                    } catch (Exception e) {
-                        throw new SiddhiAppRuntimeException(e.getMessage());
-                    }
+//                    } catch (Exception e) { //todo: catch the exact exception
+//                        throw new SiddhiAppRuntimeException(e.getMessage());
+//                    }
 
                 } else if (tensorDataType == DataType.UINT8) {
-                    for (byte value: byteArray) {
+                    for (byte value : byteArray) {
                         objectList.add((int) value);
                     }
                 } else {
-                    for (byte value: byteArray) {
+                    for (byte value : byteArray) {
                         if (value == 1) {
                             objectList.add(true);
                         } else {
@@ -184,14 +185,16 @@ public class CoreUtils {
         return outputs;
     }
 
-    public static boolean isNodePresent(java.util.Map<java.lang.String, org.tensorflow.framework.TensorInfo> map,
+    public static boolean isNodePresent(Map<String, TensorInfo> map,
                                         String name) {
-        boolean ans = false;
         for (Map.Entry<String, TensorInfo> entry: map.entrySet()) {
-            if (Objects.equals(entry.getValue().getName(), name + ":0")) {
-                ans = true;
+            if (entry.getValue().getName().equals(name + ":0")) {
+                return true;
             }
+//            if (Objects.equals(entry.getValue().getName(), name + ":0")) {
+//                return true;
+//            }
         }
-        return ans;
+        return false;
     }
 }

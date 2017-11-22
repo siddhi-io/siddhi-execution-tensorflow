@@ -18,7 +18,7 @@
 
 package org.wso2.extension.siddhi.execution.tensorflow;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.InvalidProtocolBufferException; //todo: package the dependancy jars?
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
@@ -61,12 +61,12 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
         namespace = "tensorFlow",
         description = "Performs inferences (prediction) from an already built TensorFlow machine learning model. " +
                 "The types of models are unlimited (including image classifiers, deep learning models) as long as " +
-                "they satisfy the following conditions.\n" +
+                "they satisfy the following conditions.\n" + //todo: specify the serialization format
                 "1. They are saved with the tag 'serve'\n" +
                 "2. Model is initially trained and ready for inferences\n" +
                 "3. Inference logic is written and saved in the model\n" +
-                "4. Signature def is properly included in the metaGraphDef and the key for prediction signature " +
-                "def is 'serving-default'\n" +
+                "4. signature_def is properly included in the metaGraphDef and the key for prediction signature " +
+                "def is 'serving-default'\n" + //todo: explain metaGraphDef
                 "\n" +
                 "Also the prerequisites for inference are as follows.\n" +
                 "1. User knows the names of the input and output nodes\n" +
@@ -90,7 +90,7 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
                 "\n" +
                 "You will have to import the following in Java.\n" +
                 "import org.tensorflow.framework.MetaGraphDef;\n" +
-                "import org.tensorflow.framework.SignatureDef;",
+                "import org.tensorflow.framework.SignatureDef;", //todo: give the key of signature def and ask to read proto file
         parameters = {
                 @Parameter(
                         name = "absolute.path.to.model",
@@ -117,7 +117,7 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
                 @Parameter(
                         name = "output.node.names",
                         description = "This is a variable length parameter. The names of the output nodes as strings.",
-                        type = {DataType.STRING}
+                        type = {DataType.STRING} //todo: say comma seperated
                 ),
                 @Parameter(
                         name = "attributes",
@@ -134,8 +134,8 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
                                 "inference will be flattened out and sent in their primitive values. User is " +
                                 "expected to know the shape of the output tensors if he/she wishes to reconstruct " +
                                 "it. The shape and data type information can be retrieved from TensorFlow saved " +
-                                "model signature def. See the description of this extension for instructions on how " +
-                                "to read signature def",
+                                "model signature_def. See the description of this extension for instructions on how " +
+                                "to read signature_def",
                         type = {DataType.INT, DataType.STRING, DataType.DOUBLE, DataType.LONG, DataType.FLOAT,
                                 DataType.BOOL}
                 ),
@@ -146,7 +146,7 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
                             "@info(name = 'query1') \n" +
                             "from InputStream#tensorFlow:predict(" +
                             "'<path_to_MNIST_model>', 2, 1, 'input_tensor', 'dropout/keep_prob', " +
-                            "'output_tensor', x, y) \n" +
+                            "'output_tensor', x, y) \n" + //todo: remove no of inputs and outputs and read from signature def
                             "select output_tensor0, output_tensor1, output_tensor2, output_tensor3, output_tensor4, " +
                             "output_tensor5, output_tensor6, output_tensor7, output_tensor8, output_tensor9 \n" +
                             "insert into OutputStream;",
@@ -157,7 +157,7 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
             )
         }
 )
-public class TensorFlowSPExtension extends StreamProcessor {
+public class TensorFlowSPExtension extends StreamProcessor { //todo: check class naming
     private String[] inputNamesArray;
     private String[] outputNamesArray;
     private int noOfInputs;
@@ -174,7 +174,7 @@ public class TensorFlowSPExtension extends StreamProcessor {
         //Checking if at least minimum number of constant params are present in the query
         if (attributeExpressionLength < minConstantParams) {
             throw new SiddhiAppCreationException("Insufficient number of parameters. Query should have at least 5 " +
-                    "constant parameters and appropriate number of variable parameters.");
+                    "constant parameters and appropriate number of variable parameters."); //todo: log the attribute expresssion length
         }
 
         //expressionExecutors[0] --> absolute path to model
@@ -191,7 +191,7 @@ public class TensorFlowSPExtension extends StreamProcessor {
         }
 
         //loading the saved model
-        final String SERVING_TAG = "serve";
+        final String SERVING_TAG = "serve"; //todo: not capital
         SavedModelBundle tensorFlowSavedModel = SavedModelBundle.load(modelPath, SERVING_TAG);
         tensorFlowSession = tensorFlowSavedModel.session();
 
@@ -262,7 +262,7 @@ public class TensorFlowSPExtension extends StreamProcessor {
 
         //Validating and extracting the output names from the query parameters
         for (int i = 0; i < noOfOutputs; i++) {
-            int index = i + 3 + noOfInputs;
+            int index = i + 3 + noOfInputs; //todo: dont use 3. name and use const
             if (!(attributeExpressionExecutors[index] instanceof ConstantExpressionExecutor)) {
                 throw new SiddhiAppCreationException("The query parameter of index " + (index + 1) + " is a output " +
                         "name which has to be a constant but found " +
@@ -280,16 +280,16 @@ public class TensorFlowSPExtension extends StreamProcessor {
 
         //Checking whether the node names are present in the signature def
         final SignatureDef signatureDef;
-        final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = "serving_default";
-        try {
+        final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = "serving_default"; //todo: move up
+        try { //todo: get the keys as names not tensor names
             signatureDef =
                     MetaGraphDef.parseFrom(tensorFlowSavedModel.metaGraphDef())
                             .getSignatureDefOrThrow(DEFAULT_SERVING_SIGNATURE_DEF_KEY);
         } catch (InvalidProtocolBufferException e) {
-            throw new SiddhiAppCreationException("Error while reading signature def." + e.getMessage());
+            throw new SiddhiAppCreationException("Error while reading signature def." + e.getMessage(), e);
         }
 
-        for (String inputNodeName: inputNamesArray) {
+        for (String inputNodeName : inputNamesArray) {
             if (!(isNodePresent(signatureDef.getInputsMap(), inputNodeName))) {
                 throw new SiddhiAppCreationException(inputNodeName + " not present in the signature def. Please " +
                         "check the input node names");
@@ -319,14 +319,14 @@ public class TensorFlowSPExtension extends StreamProcessor {
             while (complexEventChunk.hasNext()) {
                 StreamEvent streamEvent = complexEventChunk.next();
 
-                Session.Runner tensorFlowRunner = tensorFlowSession.runner();
-
+                Session.Runner tensorFlowRunner = tensorFlowSession.runner(); //todo: check whether we can move this to init
+                //todo: check whether we can reuse the runner if not remove synch
                 //getting TensorFlow input values from stream event and feeding the model
                 for (int i = 0; i < noOfInputs; i++) {
                     try {
                         Tensor input = Tensor.create(inputVariableExpressionExecutors[i].execute(streamEvent));
                         tensorFlowRunner = tensorFlowRunner.feed(inputNamesArray[i], input);
-                    } catch (Exception e) {
+                    } catch (Exception e) { //todo: catch throwable and log saying error occcured with error level with e.getmsg
                         throw new SiddhiAppValidationException("Error while feeding input " + inputNamesArray[i] +
                                 ". " + e.getMessage());
                     }
@@ -359,7 +359,7 @@ public class TensorFlowSPExtension extends StreamProcessor {
     @Override
     public Map<String, Object> currentState() {
         return null;
-    }
+    } //if the model learns with predictions and java api supports saving models handle
 
     @Override
     public void restoreState(Map<String, Object> map) {
