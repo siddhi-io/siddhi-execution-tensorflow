@@ -65,6 +65,8 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
                 "1. They are saved with the tag 'serve'\n" +
                 "2. Model is initially trained and ready for inferences\n" +
                 "3. Inference logic is written and saved in the model\n" +
+                "4. Signature def is properly included in the metaGraphDef and the key for prediction signature " +
+                "def is 'serving-default'\n" +
                 "\n" +
                 "Also the prerequisites for inference are as follows.\n" +
                 "1. User knows the names of the input and output nodes\n" +
