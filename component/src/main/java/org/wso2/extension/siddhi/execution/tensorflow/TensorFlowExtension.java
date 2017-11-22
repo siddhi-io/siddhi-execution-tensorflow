@@ -18,7 +18,8 @@
 
 package org.wso2.extension.siddhi.execution.tensorflow;
 
-import com.google.protobuf.InvalidProtocolBufferException; //todo: package the dependancy jars?
+import com.google.protobuf.InvalidProtocolBufferException; //todo: package the dependency jars?
+import org.apache.log4j.Logger;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
@@ -44,14 +45,13 @@ import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getOutputObjectArray;
 import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getReturnAttributeList;
-import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNodePresent;
 
 /***
  * Stream processor extension to support inferences from TensorFlow models
@@ -61,12 +61,13 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
         namespace = "tensorFlow",
         description = "Performs inferences (prediction) from an already built TensorFlow machine learning model. " +
                 "The types of models are unlimited (including image classifiers, deep learning models) as long as " +
-                "they satisfy the following conditions.\n" + //todo: specify the serialization format
-                "1. They are saved with the tag 'serve'\n" +
+                "they satisfy the following conditions.\n" +
+                "1. They are saved with the tag 'serve' in SavedModel format\n" +
                 "2. Model is initially trained and ready for inferences\n" +
                 "3. Inference logic is written and saved in the model\n" +
-                "4. signature_def is properly included in the metaGraphDef and the key for prediction signature " +
-                "def is 'serving-default'\n" + //todo: explain metaGraphDef
+                "4. signature_def is properly included in the metaGraphDef (a protocol buffer file which has " +
+                "information about the graph) and the key for prediction signature " +
+                "def is 'serving-default'\n" +
                 "\n" +
                 "Also the prerequisites for inference are as follows.\n" +
                 "1. User knows the names of the input and output nodes\n" +
@@ -90,7 +91,7 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
                 "\n" +
                 "You will have to import the following in Java.\n" +
                 "import org.tensorflow.framework.MetaGraphDef;\n" +
-                "import org.tensorflow.framework.SignatureDef;", //todo: give the key of signature def and ask to read proto file
+                "import org.tensorflow.framework.SignatureDef;",
         parameters = {
                 @Parameter(
                         name = "absolute.path.to.model",
@@ -98,26 +99,16 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
                         type = {DataType.STRING}
                 ),
                 @Parameter(
-                        name = "no.of.inputs",
-                        description = "The number of input nodes of the inference graph which need to be fed for a " +
-                                "successful prediction. Usually one or two but any number of inputs are supported.",
-                        type = {DataType.INT}
-                ),
-                @Parameter(
-                        name = "no.of.outputs",
-                        description = "The number of output nodes. Usually one but any number of outputs are " +
-                                "supported.",
-                        type = {DataType.INT}
-                ),
-                @Parameter(
                         name = "input.node.names",
-                        description = "This is a variable length parameter. The names of the input nodes as strings.",
+                        description = "This is a variable length parameter. The names of the input nodes as comma " +
+                                "separated strings.",
                         type = {DataType.STRING}
                 ),
                 @Parameter(
                         name = "output.node.names",
-                        description = "This is a variable length parameter. The names of the output nodes as strings.",
-                        type = {DataType.STRING} //todo: say comma seperated
+                        description = "This is a variable length parameter. The names of the output nodes as comma " +
+                                "separated strings.",
+                        type = {DataType.STRING}
                 ),
                 @Parameter(
                         name = "attributes",
@@ -144,12 +135,11 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
             @Example(
                     syntax = "define stream InputStream (x Object, y Object);\n" +
                             "@info(name = 'query1') \n" +
-                            "from InputStream#tensorFlow:predict(" +
-                            "'<path_to_MNIST_model>', 2, 1, 'input_tensor', 'dropout/keep_prob', " +
-                            "'output_tensor', x, y) \n" + //todo: remove no of inputs and outputs and read from signature def
-                            "select output_tensor0, output_tensor1, output_tensor2, output_tensor3, output_tensor4, " +
-                            "output_tensor5, output_tensor6, output_tensor7, output_tensor8, output_tensor9 \n" +
-                            "insert into OutputStream;",
+                            "from InputStream#tensorFlow:predict('home/MNIST', 'inputPoint', " +
+                            "'dropout', 'outputPoint', x, y) \n" +
+                            "select outputPoint0, outputPoint1, outputPoint2, outputPoint3, outputPoint4, " +
+                            "outputPoint5, outputPoint6, outputPoint7, outputPoint8, outputPoint9 \n" +
+                            "insert into OutputStream;\n",
                     description = "This is a query to get inferences from a MNIST model. This model takes in 2 " +
                             "inputs. One being the image as float array and other is keep probability array and " +
                             "sends out a Tensor with 10 elements. Our stream processor flattens the tensor and sends " +
@@ -157,24 +147,29 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.isNo
             )
         }
 )
-public class TensorFlowSPExtension extends StreamProcessor { //todo: check class naming
-    private String[] inputNamesArray;
-    private String[] outputNamesArray;
+public class TensorFlowExtension extends StreamProcessor {
+    private static final Logger logger = Logger.getLogger(TensorFlowExtension.class);
+    private String[] inputVariableNamesArray;
+    private String[] outputVariableNamesArray;
     private int noOfInputs;
     private int noOfOutputs;
     private VariableExpressionExecutor[] inputVariableExpressionExecutors;
     private Session tensorFlowSession;
+    private SignatureDef signatureDef;
+    private SavedModelBundle tensorFlowSavedModel;
 
     @Override
     protected List<Attribute> init(AbstractDefinition abstractDefinition, ExpressionExecutor[] expressionExecutors,
                                    ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
 
-        final int minConstantParams = 5;
+        final int minConstantParams = 3;
 
         //Checking if at least minimum number of constant params are present in the query
         if (attributeExpressionLength < minConstantParams) {
-            throw new SiddhiAppCreationException("Insufficient number of parameters. Query should have at least 5 " +
-                    "constant parameters and appropriate number of variable parameters."); //todo: log the attribute expresssion length
+            String message = "Insufficient number of parameters. Query should have at least 5 constant parameters " +
+                    "and appropriate number of variable parameters but given " + attributeExpressionLength;
+            logger.error(siddhiAppContext.getName() + message);
+            throw new SiddhiAppCreationException(message);
         }
 
         //expressionExecutors[0] --> absolute path to model
@@ -191,67 +186,49 @@ public class TensorFlowSPExtension extends StreamProcessor { //todo: check class
         }
 
         //loading the saved model
-        final String SERVING_TAG = "serve"; //todo: not capital
-        SavedModelBundle tensorFlowSavedModel = SavedModelBundle.load(modelPath, SERVING_TAG);
+        final String servingTag = "serve";
+        tensorFlowSavedModel = SavedModelBundle.load(modelPath, servingTag);
         tensorFlowSession = tensorFlowSavedModel.session();
 
-        //expressionExecutors[1] --> noOfInputs
-        if (!(attributeExpressionExecutors[1] instanceof ConstantExpressionExecutor)) {
-            throw new SiddhiAppCreationException("2nd query parameter is number of inputs which has to be a constant " +
-                    "but found " + this.attributeExpressionExecutors[1].getClass().getCanonicalName());
-        }
-        if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
-            noOfInputs = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
-            if (noOfInputs < 1) {
-                throw new SiddhiAppCreationException("Number of inputs should be at least 1 but given as " +
-                        noOfInputs);
-            }
-        } else {
-            throw new SiddhiAppCreationException("2nd query parameter is number of inputs which has to be of type " +
-                    "int but found " + attributeExpressionExecutors[1].getReturnType());
+        //Loading signatureDef
+        final String defaultServingSignatureDefKey = "serving_default";
+        try {
+            signatureDef =
+                    MetaGraphDef.parseFrom(tensorFlowSavedModel.metaGraphDef())
+                            .getSignatureDefOrThrow(defaultServingSignatureDefKey);
+        } catch (InvalidProtocolBufferException e) {
+            throw new SiddhiAppCreationException("Error while reading signature def." + e.getMessage(), e);
         }
 
-        //Instantiate inputNamesArray
-        inputNamesArray = new String[noOfInputs];
-
-        //expressionExecutors[2] --> noOfOutputs
-        if (!(attributeExpressionExecutors[2] instanceof ConstantExpressionExecutor)) {
-            throw new SiddhiAppCreationException("3rd query parameter is number of outputs which has to be a " +
-                    "constant but found " + this.attributeExpressionExecutors[2].getClass().getCanonicalName());
-        }
-        if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.INT) {
-            noOfOutputs = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[2]).getValue();
-            if (noOfOutputs < 1) {
-                throw new SiddhiAppCreationException("Number of outputs should be at least 1 but given as " +
-                        noOfOutputs);
-            }
-        } else {
-            throw new SiddhiAppCreationException("3rd query parameter is number of outputs which has to be of type " +
-                    "int but found " + attributeExpressionExecutors[2].getReturnType());
-        }
-
-        //Instantiate outputNamesArray
-        outputNamesArray = new String[noOfOutputs];
+        noOfInputs = signatureDef.getInputsCount();
+        noOfOutputs = signatureDef.getOutputsCount();
 
         //Checking if the specified number of inputs are given
-        final int noOfQueryParams = 3 + 2 * noOfInputs + noOfOutputs;
+        final int noOfQueryParams = 1 + 2 * noOfInputs + noOfOutputs;
         if (attributeExpressionLength != noOfQueryParams) {
-            throw new SiddhiAppCreationException("Invalid number of query parameters. Number of inputs and " +
-                    "number of outputs are specified as " + noOfInputs + " and " + noOfOutputs + " respectively. So " +
-                    "the total number of query parameters should be " + noOfQueryParams + " but " +
-                    attributeExpressionLength + " given.");
+            String message = "Invalid number of query parameters. Number of inputs and number of outputs are " +
+                    "specified as " + noOfInputs + " and " + noOfOutputs + " respectively. So the total number of " +
+                    "query parameters should be " + noOfQueryParams + " but " + attributeExpressionLength + " given.";
+            logger.error(siddhiAppContext.getName() + message);
+            throw new SiddhiAppCreationException(message);
         }
+
+        //Instantiate inputVariableNamesArray
+        inputVariableNamesArray = new String[noOfInputs];
+
+        //Instantiate outputVariableNamesArray
+        outputVariableNamesArray = new String[noOfOutputs];
 
         //Validating and extracting the input names from the query parameters
         for (int i = 0; i < noOfInputs; i++) {
-            int index = i + 3;
+            int index = i + 1;
             if (!(attributeExpressionExecutors[index] instanceof ConstantExpressionExecutor)) {
                 throw new SiddhiAppCreationException("The query parameter of index " + (index + 1) + " is a input " +
                         "name which has to be a constant but found " +
                         this.attributeExpressionExecutors[index].getClass().getCanonicalName());
             }
             if (attributeExpressionExecutors[index].getReturnType() == Attribute.Type.STRING) {
-                inputNamesArray[i] = (String) ((ConstantExpressionExecutor)
+                inputVariableNamesArray[i] = (String) ((ConstantExpressionExecutor)
                         attributeExpressionExecutors[index]).getValue();
             } else {
                 throw new SiddhiAppCreationException("The query parameter of index " + (index + 1) + " is a input " +
@@ -262,14 +239,14 @@ public class TensorFlowSPExtension extends StreamProcessor { //todo: check class
 
         //Validating and extracting the output names from the query parameters
         for (int i = 0; i < noOfOutputs; i++) {
-            int index = i + 3 + noOfInputs; //todo: dont use 3. name and use const
+            int index = i + 1 + noOfInputs;
             if (!(attributeExpressionExecutors[index] instanceof ConstantExpressionExecutor)) {
                 throw new SiddhiAppCreationException("The query parameter of index " + (index + 1) + " is a output " +
                         "name which has to be a constant but found " +
                         this.attributeExpressionExecutors[index].getClass().getCanonicalName());
             }
             if (attributeExpressionExecutors[index].getReturnType() == Attribute.Type.STRING) {
-                outputNamesArray[i] = (String) ((ConstantExpressionExecutor)
+                outputVariableNamesArray[i] = (String) ((ConstantExpressionExecutor)
                         attributeExpressionExecutors[index]).getValue();
             } else {
                 throw new SiddhiAppCreationException("The query parameter of index " + (index + 1) + " is a output " +
@@ -279,90 +256,83 @@ public class TensorFlowSPExtension extends StreamProcessor { //todo: check class
         }
 
         //Checking whether the node names are present in the signature def
-        final SignatureDef signatureDef;
-        final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = "serving_default"; //todo: move up
-        try { //todo: get the keys as names not tensor names
-            signatureDef =
-                    MetaGraphDef.parseFrom(tensorFlowSavedModel.metaGraphDef())
-                            .getSignatureDefOrThrow(DEFAULT_SERVING_SIGNATURE_DEF_KEY);
-        } catch (InvalidProtocolBufferException e) {
-            throw new SiddhiAppCreationException("Error while reading signature def." + e.getMessage(), e);
-        }
-
-        for (String inputNodeName : inputNamesArray) {
-            if (!(isNodePresent(signatureDef.getInputsMap(), inputNodeName))) {
+        for (String inputNodeName : inputVariableNamesArray) {
+            if (!(signatureDef.getInputsMap().containsKey(inputNodeName))) {
                 throw new SiddhiAppCreationException(inputNodeName + " not present in the signature def. Please " +
                         "check the input node names");
             }
         }
 
-        for (String outputNodeName: outputNamesArray) {
-            if (!(isNodePresent(signatureDef.getOutputsMap(), outputNodeName))) {
+        for (String outputNodeName: outputVariableNamesArray) {
+            if (!(signatureDef.getOutputsMap().containsKey(outputNodeName))) {
                 throw new SiddhiAppCreationException(outputNodeName + " not present in the signature def. Please " +
                         "check the output node names.");
             }
         }
 
-        int inputValuesStartIndex = 3 + noOfInputs + noOfOutputs;
+        int inputValuesStartIndex = 1 + noOfInputs + noOfOutputs;
 
         //Extracting and validating variable expression executors
         inputVariableExpressionExecutors = CoreUtils.extractAndValidateTensorFlowInputs(attributeExpressionExecutors,
                 inputValuesStartIndex, noOfInputs);
 
-        return getReturnAttributeList(noOfOutputs, tensorFlowSavedModel, outputNamesArray);
+        return getReturnAttributeList(signatureDef, noOfOutputs, tensorFlowSavedModel, outputVariableNamesArray);
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> complexEventChunk, Processor processor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
-        synchronized (this) {
-            while (complexEventChunk.hasNext()) {
-                StreamEvent streamEvent = complexEventChunk.next();
+        while (complexEventChunk.hasNext()) {
+            StreamEvent streamEvent = complexEventChunk.next();
 
-                Session.Runner tensorFlowRunner = tensorFlowSession.runner(); //todo: check whether we can move this to init
-                //todo: check whether we can reuse the runner if not remove synch
-                //getting TensorFlow input values from stream event and feeding the model
-                for (int i = 0; i < noOfInputs; i++) {
-                    try {
-                        Tensor input = Tensor.create(inputVariableExpressionExecutors[i].execute(streamEvent));
-                        tensorFlowRunner = tensorFlowRunner.feed(inputNamesArray[i], input);
-                    } catch (Exception e) { //todo: catch throwable and log saying error occcured with error level with e.getmsg
-                        throw new SiddhiAppValidationException("Error while feeding input " + inputNamesArray[i] +
-                                ". " + e.getMessage());
-                    }
+            Session.Runner tensorFlowRunner = tensorFlowSession.runner();
+            //getting TensorFlow input values from stream event and feeding the model
+            for (int i = 0; i < noOfInputs; i++) {
+                try {
+                    Tensor input = Tensor.create(inputVariableExpressionExecutors[i].execute(streamEvent));
+                    tensorFlowRunner = tensorFlowRunner.feed(
+                            signatureDef.getInputsMap().get(inputVariableNamesArray[i]).getName(), input);
+                } catch (Throwable e) {
+                    //catching throwable and logging because we don't want to stop the app if one bad input is given
+                    logger.error("Error while feeding input " + inputVariableNamesArray[i] + ". " + e.getMessage());
                 }
-
-                //fetching all the required outputs
-                for (int i = 0; i < noOfOutputs; i++) {
-                    tensorFlowRunner = tensorFlowRunner.fetch(outputNamesArray[i]);
-                }
-
-                //Running the session and getting the output tensors
-                List<Tensor> outputTensors = tensorFlowRunner.run();
-
-                complexEventPopulater.populateComplexEvent(streamEvent, getOutputObjectArray(outputTensors));
             }
+
+            //fetching all the required outputs
+            for (int i = 0; i < noOfOutputs; i++) {
+                tensorFlowRunner = tensorFlowRunner.fetch(
+                        signatureDef.getOutputsMap().get(outputVariableNamesArray[i]).getName());
+            }
+
+            //Running the session and getting the output tensors
+            List<Tensor> outputTensors = tensorFlowRunner.run();
+
+            complexEventPopulater.populateComplexEvent(streamEvent, getOutputObjectArray(outputTensors));
         }
         nextProcessor.process(complexEventChunk);
     }
 
     @Override
     public void start() {
-
+        tensorFlowSession = tensorFlowSavedModel.session();
     }
 
     @Override
     public void stop() {
-
+        //If the model learns with predictions then we need to persist the model and restore.
+        //But current TensorFlow Java API r1.4 doesn't support serving of models
+        tensorFlowSession.close();
     }
 
     @Override
     public Map<String, Object> currentState() {
-        return null;
-    } //if the model learns with predictions and java api supports saving models handle
+        Map<String, Object> map = new HashMap();
+        map.put("savedModel", tensorFlowSavedModel);
+        return map;
+    }
 
     @Override
     public void restoreState(Map<String, Object> map) {
-
+        tensorFlowSavedModel = (SavedModelBundle) map.get("savedModel");
     }
 }

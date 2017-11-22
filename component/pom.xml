@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.wso2.extension.siddhi.execution.tensorflow</groupId>
         <artifactId>siddhi-execution-tensorflow-parent</artifactId>
-        <version>1.0.9-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -38,35 +38,17 @@
             <artifactId>siddhi-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow</artifactId>
-            <version>1.3.0</version> //todo: define in parent pom and refer here
         </dependency>
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>proto</artifactId>
-            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -97,14 +79,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <skipTests>false</skipTests>
@@ -122,6 +96,10 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Private-Package>
+                            com.google.protobuf.*,
+                            org.tensorflow.*
+                        </Private-Package>
                         <Export-Package>
                             org.wso2.extension.siddhi.execution.streamingml.tensorflow.*
                         </Export-Package>
@@ -130,7 +108,7 @@
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
-                        </Include-Resource> //todo: refer gpl pom and edit to include private packages of proto and tensrflow
+                        </Include-Resource>
                     </instructions>
                 </configuration>
             </plugin>

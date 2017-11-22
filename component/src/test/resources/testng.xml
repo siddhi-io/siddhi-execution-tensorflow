@@ -22,7 +22,7 @@
 <suite name="Execution-TensorFlow-Test-Suite">
     <test name="execution-tensorflow-tests" enabled="true" preserve-order="true">
         <classes>
-            <class name="org.wso2.extension.siddhi.execution.tensorflow.TensorFlowSPExtensionTest"/>
+            <class name="org.wso2.extension.siddhi.execution.tensorflow.TensorFlowExtensionTest"/>
         </classes>
     </test>
 </suite>

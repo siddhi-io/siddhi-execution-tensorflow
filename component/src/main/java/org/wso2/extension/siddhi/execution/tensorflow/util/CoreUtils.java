@@ -22,8 +22,7 @@ import org.tensorflow.DataType;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Shape;
 import org.tensorflow.Tensor;
-import org.tensorflow.framework.TensorInfo;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
+import org.tensorflow.framework.SignatureDef;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -34,12 +33,10 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Core util functions for TensorFlow SP extension
@@ -64,23 +61,26 @@ public class CoreUtils {
         return inputVariableExpressionExecutors;
     }
 
-    public static List<Attribute> getReturnAttributeList(int noOfOutputs, SavedModelBundle tensorFlowSavedModel,
+    public static List<Attribute> getReturnAttributeList(SignatureDef signatureDef, int noOfOutputs,
+                                                         SavedModelBundle tensorFlowSavedModel,
                                                          String[] outputNamesArray) {
         List<Attribute> attributeList = new ArrayList<>(noOfOutputs);
         for (int i = 0; i < noOfOutputs; i++) {
 
-            DataType outputDataType = tensorFlowSavedModel.graph().operation(outputNamesArray[i]).output(0)
+            String nodeName = signatureDef.getOutputsMap().get(outputNamesArray[i]).getName();
+            String opName = nodeName.substring(0, nodeName.lastIndexOf(":"));
+
+            DataType outputDataType = tensorFlowSavedModel.graph().operation(opName).output(0)
                     .dataType();
             if (outputDataType == DataType.STRING) {
                 attributeList.add(new Attribute(outputNamesArray[i], Attribute.Type.STRING));
             } else {
 
-                Shape outputShape = tensorFlowSavedModel.graph().operation(outputNamesArray[i]).output(0).shape();
-                //todo: try to find data type without getting zeroth output
+                Shape outputShape = tensorFlowSavedModel.graph().operation(opName).output(0).shape();
                 //Finding the total number of elements
                 int numElements = 1;
 
-                for (int k = 0; k < outputShape.numDimensions(); k++) { //todo: get the number of elements from the signature def
+                for (int k = 0; k < outputShape.numDimensions(); k++) {
                     if (outputShape.size(k) == -1) {
                         continue;
                     }
@@ -88,7 +88,7 @@ public class CoreUtils {
                 }
 
                 for (int j = 0; j < numElements; j++) {
-                    if (outputDataType == DataType.FLOAT) { //todo: use switch case?
+                    if (outputDataType == DataType.FLOAT) {
                         attributeList.add(new Attribute(outputNamesArray[i] + j, Attribute.Type.FLOAT));
 
                     } else if (outputDataType == DataType.BOOL) {
@@ -158,12 +158,8 @@ public class CoreUtils {
                 byte[] byteArray = byteBuffer.array();
 
                 if (tensorDataType == DataType.STRING) {
-//                    try {
-                        String recoveredString = new String(byteArray, Charset.); //todo: use charset const
-                        objectList.add(recoveredString);
-//                    } catch (Exception e) { //todo: catch the exact exception
-//                        throw new SiddhiAppRuntimeException(e.getMessage());
-//                    }
+                    String recoveredString = new String(byteArray, StandardCharsets.UTF_8);
+                    objectList.add(recoveredString);
 
                 } else if (tensorDataType == DataType.UINT8) {
                     for (byte value : byteArray) {
@@ -185,16 +181,4 @@ public class CoreUtils {
         return outputs;
     }
 
-    public static boolean isNodePresent(Map<String, TensorInfo> map,
-                                        String name) {
-        for (Map.Entry<String, TensorInfo> entry: map.entrySet()) {
-            if (entry.getValue().getName().equals(name + ":0")) {
-                return true;
-            }
-//            if (Objects.equals(entry.getValue().getName(), name + ":0")) {
-//                return true;
-//            }
-        }
-        return false;
-    }
 }

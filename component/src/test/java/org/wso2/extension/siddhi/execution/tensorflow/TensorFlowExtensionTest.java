@@ -34,8 +34,8 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
 
-public class TensorFlowSPExtensionTest {
-    private static final Logger logger = Logger.getLogger(TensorFlowSPExtensionTest.class);
+public class TensorFlowExtensionTest {
+    private static final Logger logger = Logger.getLogger(TensorFlowExtensionTest.class);
     private volatile AtomicInteger count;
 
     @BeforeMethod
@@ -48,13 +48,13 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'input', 'output', x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
                 );
 
@@ -63,7 +63,6 @@ public class TensorFlowSPExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
-//                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -105,15 +104,15 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object, y Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/MNIST";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 2, 1, 'input_tensor', " +
-                        "'dropout/keep_prob', 'output_tensor', x, y) " +
-                        "select output_tensor0, output_tensor1, output_tensor2, output_tensor3, output_tensor4, " +
-                        "output_tensor5, output_tensor6, output_tensor7, output_tensor8, output_tensor9 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', " +
+                        "'dropout', 'outputPoint', x, y) " +
+                        "select outputPoint0, outputPoint1, outputPoint2, outputPoint3, outputPoint4, " +
+                        "outputPoint5, outputPoint6, outputPoint7, outputPoint8, outputPoint9 " +
                         "insert into OutputStream;"
         );
 
@@ -122,7 +121,6 @@ public class TensorFlowSPExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
-//                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -142,7 +140,7 @@ public class TensorFlowSPExtensionTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
         try {
-            BufferedImage image = ImageIO.read(TensorFlowSPExtensionTest.class.getResource("/10.png"));
+            BufferedImage image = ImageIO.read(TensorFlowExtensionTest.class.getResource("/10.png"));
             float[] imgAsFloatArray = img2array(image);
 
             float[] keepProbArray = new float[1024];
@@ -172,14 +170,14 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/Regression";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'x_coordinate', " +
-                        "'y_coordinate', x) " +
-                        "select y_coordinate0, y_coordinate1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', " +
+                        "'outputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -188,7 +186,6 @@ public class TensorFlowSPExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
-//                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -220,8 +217,8 @@ public class TensorFlowSPExtensionTest {
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict(y, 1, 1, 'input', 'output', x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict(y, 'inputPoint', 'outputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
         try {
@@ -235,65 +232,17 @@ public class TensorFlowSPExtensionTest {
     }
 
     @Test
-    public void validatingSecondParamIsConstant() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object, y int);";
-
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
-        String query = (
-                "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', y, 1, 'input', 'output', x) " +
-                        "select output0, output1 " +
-                        "insert into OutputStream;"
-        );
-
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-        } catch (Exception e) {
-            AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("2nd query parameter is number of inputs which " +
-                    "has to be a constant but found org.wso2.siddhi.core.executor.VariableExpressionExecutor"));
-        }
-    }
-
-    @Test
-    public void validatingThirdParamIsConstant() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object, y int);";
-
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
-        String query = (
-                "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, y, 'input', 'output', x) " +
-                        "select output0, output1 " +
-                        "insert into OutputStream;"
-        );
-
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-        } catch (Exception e) {
-            AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("3rd query parameter is number of outputs " +
-                    "which has to be a constant but found org.wso2.siddhi.core.executor.VariableExpressionExecutor"));
-        }
-    }
-
-    @Test
     public void validatingInputNameIsConstant() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object, y String);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, y, 'output', x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', y, 'outputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -301,7 +250,7 @@ public class TensorFlowSPExtensionTest {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 4 is a input " +
+            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 2 is a input " +
                     "name which has to be a constant but found org.wso2.siddhi.core.executor" +
                     ".VariableExpressionExecutor"));
         }
@@ -312,13 +261,13 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object, y String);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'input', y, x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', y, x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -326,7 +275,7 @@ public class TensorFlowSPExtensionTest {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 5 is a output " +
+            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 3 is a output " +
                     "name which has to be a constant but found org.wso2.siddhi.core.executor" +
                     ".VariableExpressionExecutor"));
         }
@@ -339,8 +288,8 @@ public class TensorFlowSPExtensionTest {
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict(2, 1, 1, 'input', 'output', x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict(2, 'inputPoint', 'outputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
         try {
@@ -353,65 +302,17 @@ public class TensorFlowSPExtensionTest {
     }
 
     @Test
-    public void validatingSecondParamIsInt() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
-
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
-        String query = (
-                "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1f, 1, 'input', 'output', x) " +
-                        "select output0, output1 " +
-                        "insert into OutputStream;"
-        );
-
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-        } catch (Exception e) {
-            AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("2nd query parameter is number of inputs " +
-                    "which has to be of type int but found FLOAT"));
-        }
-    }
-
-    @Test
-    public void validatingThirdParamIsInt() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
-
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
-        String query = (
-                "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 0.4, 'input', 'output', x) " +
-                        "select output0, output1 " +
-                        "insert into OutputStream;"
-        );
-
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-        } catch (Exception e) {
-            AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("3rd query parameter is number of outputs " +
-                    "which has to be of type int but found DOUBLE"));
-        }
-    }
-
-    @Test
     public void validatingInputNameIsString() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 5, 'output', x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 5, 'outputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -419,7 +320,7 @@ public class TensorFlowSPExtensionTest {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 4 is a input " +
+            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 2 is a input " +
                     "name which has to be a String but found INT"));
         }
     }
@@ -429,13 +330,13 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'input', true, x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', true, x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -443,7 +344,7 @@ public class TensorFlowSPExtensionTest {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 5 is a output " +
+            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 3 is a output " +
                     "name which has to be a String but found BOOL"));
         }
     }
@@ -453,13 +354,13 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'input', 'output', 4) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputPoint', 4) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -467,57 +368,9 @@ public class TensorFlowSPExtensionTest {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The parameter at index 6 is not a variable " +
+            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The parameter at index 4 is not a variable " +
                     "attribute (VariableExpressionExecutor) present in the stream definition. " +
                     "Found org.wso2.siddhi.core.executor.ConstantExpressionExecutor"));
-        }
-    }
-
-    @Test
-    public void validatingRangeOfnoOfInputs() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
-
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
-        String query = (
-                "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', -1, 1, 'input', 'output', x) " +
-                        "select output0, output1 " +
-                        "insert into OutputStream;"
-        );
-
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-        } catch (Exception e) {
-            AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("Number of inputs should be at least 1 but " +
-                    "given as -1"));
-        }
-    }
-
-    @Test
-    public void validatingRangeOfnoOfOutputs() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
-
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
-        String query = (
-                "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, -3, 'input', 'output', x) " +
-                        "select output0, output1 " +
-                        "insert into OutputStream;"
-        );
-
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-        } catch (Exception e) {
-            AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("Number of outputs should be at least 1 but " +
-                    "given as -3"));
         }
     }
 
@@ -526,13 +379,13 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'input', x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -542,7 +395,7 @@ public class TensorFlowSPExtensionTest {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
             AssertJUnit.assertTrue(e.getCause().getMessage().contains("Invalid number of query parameters. Number " +
                     "of inputs and number of outputs are specified as 1 and 1 respectively. So the total number of " +
-                    "query parameters should be 6 but 5 given."));
+                    "query parameters should be 4 but 3 given."));
         }
     }
 
@@ -551,13 +404,13 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'input', x, x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', x, x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -565,7 +418,7 @@ public class TensorFlowSPExtensionTest {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 5 is a output " +
+            AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 3 is a output " +
                     "name which has to be a constant but found org.wso2.siddhi.core.executor" +
                     ".VariableExpressionExecutor"));
         }
@@ -576,13 +429,13 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'inputX', 'output', x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputX', 'outputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
@@ -600,13 +453,13 @@ public class TensorFlowSPExtensionTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x Object);";
 
-        String tempPath = TensorFlowSPExtensionTest.class.getResource("/10.png").getPath();
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 1, 1, 'input', 'outputX', x) " +
-                        "select output0, output1 " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputX', x) " +
+                        "select outputX0, outputX9 " +
                         "insert into OutputStream;"
         );
 

@@ -1,4 +1,4 @@
-# API Docs - v1.0.0-SNAPSHOT
+# API Docs - v1.0.9-SNAPSHOT
 
 ## Tensorflow
 
@@ -8,7 +8,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-tensorFlow:predict(<STRING> absolute.path.to.model, <STRING> input.node.names, <STRING> output.node.names, <INT|STRING|DOUBLE|LONG|FLOAT|BOOL|OBJECT> attributes)
+tensorFlow:predict(<STRING> absolute.path.to.model, <INT> no.of.inputs, <INT> no.of.outputs, <STRING> input.node.names, <STRING> output.node.names, <INT|STRING|DOUBLE|LONG|FLOAT|BOOL|OBJECT> attributes)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -26,6 +26,22 @@ tensorFlow:predict(<STRING> absolute.path.to.model, <STRING> input.node.names, <
         <td style="vertical-align: top; word-wrap: break-word">This is the absolute path to the model folder in the local machine</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">no.of.inputs</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of input nodes of the inference graph which need to be fed for a successful prediction. Usually one or two but any number of inputs are supported.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">no.of.outputs</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of output nodes. Usually one but any number of outputs are supported.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
         <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
