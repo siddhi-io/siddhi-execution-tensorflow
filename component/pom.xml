@@ -101,7 +101,7 @@
                             org.tensorflow.*
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.extension.siddhi.execution.streamingml.tensorflow.*
+                            org.wso2.extension.siddhi.execution.tensorflow.*
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional

@@ -18,7 +18,7 @@
 
 package org.wso2.extension.siddhi.execution.tensorflow;
 
-import com.google.protobuf.InvalidProtocolBufferException; //todo: package the dependency jars?
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.log4j.Logger;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
@@ -95,7 +95,7 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getR
         parameters = {
                 @Parameter(
                         name = "absolute.path.to.model",
-                        description = "This is the absolute path to the model folder in the local machine",
+                        description = "This is the absolute path to the model folder in the local machine.",
                         type = {DataType.STRING}
                 ),
                 @Parameter(

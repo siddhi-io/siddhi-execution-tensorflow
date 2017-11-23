@@ -121,7 +121,7 @@ public class CoreUtils {
                 outputTensor.writeTo(floatBuffer);
                 float[] floatArray = floatBuffer.array();
 
-                for (float value : floatArray) { //todo: use collections api and try to add without iterating
+                for (float value : floatArray) {
                     objectList.add(value);
                 }
 
@@ -175,6 +175,8 @@ public class CoreUtils {
                     }
                 }
             }
+
+            outputTensor.close();
         }
         Object[] outputs = new Object[objectList.size()];
         objectList.toArray(outputs);

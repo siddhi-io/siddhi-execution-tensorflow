@@ -23,7 +23,7 @@ tensorFlow:predict(<STRING> absolute.path.to.model, <STRING> input.node.names, <
     </tr>
     <tr>
         <td style="vertical-align: top">absolute.path.to.model</td>
-        <td style="vertical-align: top; word-wrap: break-word">This is the absolute path to the model folder in the local machine</td>
+        <td style="vertical-align: top; word-wrap: break-word">This is the absolute path to the model folder in the local machine.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
