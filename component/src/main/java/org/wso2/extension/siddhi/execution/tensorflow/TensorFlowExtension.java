@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.createTensor;
 import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getOutputObjectArray;
 import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getReturnAttributeList;
 
@@ -289,9 +290,11 @@ public class TensorFlowExtension extends StreamProcessor {
             //getting TensorFlow input values from stream event and feeding the model
             for (int i = 0; i < noOfInputs; i++) {
                 try {
-                    Tensor input = Tensor.create(inputVariableExpressionExecutors[i].execute(streamEvent));
+//                    Tensor input = Tensor.create(inputVariableExpressionExecutors[i].execute(streamEvent));
+                    Tensor input = createTensor(signatureDef, inputVariableNamesArray[i],
+                            (String) inputVariableExpressionExecutors[i].execute(streamEvent));
                     tensorFlowRunner = tensorFlowRunner.feed(
-                            signatureDef.getInputsMap().get(inputVariableNamesArray[i]).getName(), input);
+                            signatureDef.getInputsMap().get(inputVariableNamesArray[i]).getName(), input); //todo: find a way to close tensor
                 } catch (Throwable e) {
                     //catching throwable and logging because we don't want to stop the app if one bad input is given
                     logger.error("Error while feeding input " + inputVariableNamesArray[i] + ". " + e.getMessage());

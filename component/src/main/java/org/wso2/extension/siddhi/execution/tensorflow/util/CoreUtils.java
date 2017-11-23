@@ -23,6 +23,7 @@ import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Shape;
 import org.tensorflow.Tensor;
 import org.tensorflow.framework.SignatureDef;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -37,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Core util functions for TensorFlow SP extension
@@ -181,6 +183,58 @@ public class CoreUtils {
         Object[] outputs = new Object[objectList.size()];
         objectList.toArray(outputs);
         return outputs;
+    }
+
+    public static long[] getShapeOfArrayAsString(String arrayAsString) {
+        int noDims = 0;
+
+        for (int i = 0; i < arrayAsString.length(); i++) {
+            if (arrayAsString.charAt(i) == ' ') {
+                continue;
+            } else if (arrayAsString.charAt(i) == '[') {
+                noDims++;
+            } else {
+                break;
+            }
+        }
+
+        long[] shape = new long[noDims];
+
+        Stack bracketStack = new Stack();
+        Stack countStack = new Stack();
+
+        for (int i = 0; i < arrayAsString.length(); i++) {
+
+            if (arrayAsString.charAt(i) == '[') {
+                bracketStack.push("[");
+                countStack.push(0);
+
+            }else if (arrayAsString.charAt(i) == ',') {
+                int tempNum = (int) countStack.pop();
+                countStack.push(tempNum + 1);
+
+            } else if (arrayAsString.charAt(i) == ']') {
+                int tempSize = (int) countStack.pop();
+                tempSize = tempSize + 1;
+                bracketStack.pop();
+
+                if (shape[bracketStack.size()] == 0) {
+                    shape[bracketStack.size()] = tempSize;
+
+                } else if (!(shape[bracketStack.size()] == tempSize)) {
+                    throw new SiddhiAppRuntimeException("Array size is inconsistent");
+                }
+            }
+        }
+
+        return shape;
+    }
+
+    public static Tensor createTensor(SignatureDef signatureDef, String variableName, String arrayAsString) {
+        long[] shape = getShapeOfArrayAsString(arrayAsString);
+
+        org.tensorflow.framework.DataType dataType = signatureDef.getInputsMap().get(variableName).getDtype();
+
     }
 
 }
