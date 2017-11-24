@@ -46,7 +46,6 @@ import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -290,11 +289,10 @@ public class TensorFlowExtension extends StreamProcessor {
             //getting TensorFlow input values from stream event and feeding the model
             for (int i = 0; i < noOfInputs; i++) {
                 try {
-//                    Tensor input = Tensor.create(inputVariableExpressionExecutors[i].execute(streamEvent));
-                    Tensor input = createTensor(signatureDef, inputVariableNamesArray[i],
-                            (String) inputVariableExpressionExecutors[i].execute(streamEvent));
+                    Tensor input = createTensor((String) inputVariableExpressionExecutors[i].execute(streamEvent));
                     tensorFlowRunner = tensorFlowRunner.feed(
-                            signatureDef.getInputsMap().get(inputVariableNamesArray[i]).getName(), input); //todo: find a way to close tensor
+                            signatureDef.getInputsMap().get(inputVariableNamesArray[i]).getName(), input);
+                    //todo: find a way to close tensor
                 } catch (Throwable e) {
                     //catching throwable and logging because we don't want to stop the app if one bad input is given
                     logger.error("Error while feeding input " + inputVariableNamesArray[i] + ". " + e.getMessage());
@@ -317,25 +315,25 @@ public class TensorFlowExtension extends StreamProcessor {
 
     @Override
     public void start() {
-        tensorFlowSession = tensorFlowSavedModel.session();
+//        tensorFlowSession = tensorFlowSavedModel.session();
     }
 
     @Override
     public void stop() {
         //If the model learns with predictions then we need to persist the model and restore.
         //But current TensorFlow Java API r1.4 doesn't support serving of models
-        tensorFlowSession.close();
+//        tensorFlowSession.close();
     }
 
     @Override
     public Map<String, Object> currentState() {
-        Map<String, Object> map = new HashMap();
-        map.put("savedModel", tensorFlowSavedModel);
-        return map;
+//        Map<String, Object> map = new HashMap();
+//        map.put("savedModel", tensorFlowSavedModel);
+        return null;
     }
 
     @Override
     public void restoreState(Map<String, Object> map) {
-        tensorFlowSavedModel = (SavedModelBundle) map.get("savedModel");
+//        tensorFlowSavedModel = (SavedModelBundle) map.get("savedModel");
     }
 }

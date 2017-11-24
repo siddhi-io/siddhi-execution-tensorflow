@@ -186,6 +186,7 @@ public class CoreUtils {
     }
 
     public static long[] getShapeOfArrayAsString(String arrayAsString) {
+        arrayAsString = arrayAsString.substring(arrayAsString.lastIndexOf(":") + 1);
         int noDims = 0;
 
         for (int i = 0; i < arrayAsString.length(); i++) {
@@ -209,7 +210,7 @@ public class CoreUtils {
                 bracketStack.push("[");
                 countStack.push(0);
 
-            }else if (arrayAsString.charAt(i) == ',') {
+            } else if (arrayAsString.charAt(i) == ',') {
                 int tempNum = (int) countStack.pop();
                 countStack.push(tempNum + 1);
 
@@ -230,11 +231,93 @@ public class CoreUtils {
         return shape;
     }
 
-    public static Tensor createTensor(SignatureDef signatureDef, String variableName, String arrayAsString) {
+    public static Tensor createTensor(String arrayAsString) {
         long[] shape = getShapeOfArrayAsString(arrayAsString);
+        Tensor tensor;
 
-        org.tensorflow.framework.DataType dataType = signatureDef.getInputsMap().get(variableName).getDtype();
+        String dataType = arrayAsString.substring(0, arrayAsString.lastIndexOf(":"));
+        dataType = dataType.replaceAll("\\s", "");
+        arrayAsString = arrayAsString.substring(arrayAsString.lastIndexOf(":") + 1);
 
+        arrayAsString = arrayAsString.replaceAll("]", " ");
+        arrayAsString = arrayAsString.replaceAll(",", " ");
+        arrayAsString = arrayAsString.replaceAll("\\[", " ");
+        String[] stringArray = arrayAsString.split(" ");
+
+        List tempList = new LinkedList();
+
+        for (String string : stringArray) {
+            if (string != null && string.length() > 0) {
+                tempList.add(string);
+            }
+        }
+
+        //handling scalars
+        if (tempList.size() == 1) {
+            switch (dataType) {
+                case "float":
+                    tensor = Tensor.create(Float.parseFloat((String) tempList.get(0)));
+                    return tensor;
+
+                case "int":
+                    tensor = Tensor.create(Integer.parseInt((String) tempList.get(0)));
+                    return tensor;
+
+                case "double":
+                    tensor = Tensor.create(Double.parseDouble((String) tempList.get(0)));
+                    return tensor;
+
+                case "long":
+                    tensor = Tensor.create(Long.parseLong((String) tempList.get(0)));
+                    return tensor;
+
+                default:
+                    throw new SiddhiAppRuntimeException("Number encoded as String should have one of int, " +
+                            "long, float, double as prefix but given " + dataType);
+            }
+        }
+
+        //handling non-scalars
+        switch (dataType) {
+            case "float":
+                FloatBuffer floatBuffer = FloatBuffer.allocate(tempList.size());
+                for (Object string : tempList) {
+                    floatBuffer.put(Float.parseFloat((String) string));
+                }
+                floatBuffer.flip();
+                tensor = Tensor.create(shape, floatBuffer);
+                return tensor;
+
+            case "int":
+                IntBuffer intBuffer = IntBuffer.allocate(tempList.size());
+                for (Object string : tempList) {
+                    intBuffer.put(Integer.parseInt((String) string));
+                }
+                intBuffer.flip();
+                tensor = Tensor.create(shape, intBuffer);
+                return tensor;
+
+            case "double":
+                DoubleBuffer doubleBuffer = DoubleBuffer.allocate(tempList.size());
+                for (Object string : tempList) {
+                    doubleBuffer.put(Double.parseDouble((String) string));
+                }
+                doubleBuffer.flip();
+                tensor = Tensor.create(shape, doubleBuffer);
+                return tensor;
+
+            case "long":
+                LongBuffer longBuffer = LongBuffer.allocate(tempList.size());
+                for (Object string : tempList) {
+                    longBuffer.put(Long.parseLong((String) string));
+                }
+                longBuffer.flip();
+                tensor = Tensor.create(shape, longBuffer);
+                return tensor;
+
+            default:
+                throw new SiddhiAppRuntimeException("Array encoded as String should have one of int, long, " +
+                        "float, double as prefix but given " + dataType);
+        }
     }
-
 }

@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void initialTestingWithKMeansModel() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -63,6 +64,7 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
+                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -86,12 +88,9 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
         try {
-            Object firstInput = new float[] {1, -2};
-            inputHandler.send(new Object[]{firstInput});
-            Object secondInput = new float[] {1, 2};
-            inputHandler.send(new Object[]{secondInput});
-            Object thirdInput = new float[] {5, 2};
-            inputHandler.send(new Object[]{thirdInput});
+            inputHandler.send(new Object[]{"float:[1, -2]"});
+            inputHandler.send(new Object[]{"float:[1, 2]"});
+            inputHandler.send(new Object[]{"float:[5, 2]"});
         } catch (Exception e) {
             logger.error(e.getCause().getMessage());
         } finally {
@@ -102,7 +101,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void initialTestingWithMNIST() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object, y Object);";
+        String inputStream = "define stream InputStream (x String, y String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/MNIST";
@@ -121,6 +120,7 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
+                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -143,10 +143,26 @@ public class TensorFlowExtensionTest {
             BufferedImage image = ImageIO.read(TensorFlowExtensionTest.class.getResource("/10.png"));
             float[] imgAsFloatArray = img2array(image);
 
+            String imageAsString = "float:[";
+
+            for (float num : imgAsFloatArray) {
+                imageAsString  = imageAsString + num + ",";
+            }
+
+            imageAsString = imageAsString.substring(0, imageAsString.lastIndexOf(",") - 1) + "]";
+
             float[] keepProbArray = new float[1024];
             Arrays.fill(keepProbArray, 1f);
 
-            inputHandler.send(new Object[]{imgAsFloatArray, keepProbArray});
+            String keepProbString = "float:[";
+
+            for (float num : keepProbArray) {
+                keepProbString  = keepProbString + num + ",";
+            }
+
+            keepProbString = keepProbString.substring(0, keepProbString.lastIndexOf(",") - 1) + "]";
+
+            inputHandler.send(new Object[]{imageAsString, keepProbString});
         } catch (Exception e) {
             logger.error(e.getCause().getMessage());
         } finally {
@@ -168,7 +184,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void initialTestingWithRegressionModel() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/Regression";
@@ -186,6 +202,7 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
+                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -201,8 +218,7 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
         try {
-            Object firstInput = new double[] {1, -2};
-            inputHandler.send(new Object[]{firstInput});
+            inputHandler.send(new Object[]{"double :[1,-2]"});
         } catch (Exception e) {
             logger.error(e.getCause().getMessage());
         } finally {
@@ -213,7 +229,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingFirstParamIsConstant() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object, y String);";
+        String inputStream = "define stream InputStream (x String, y String);";
 
         String query = (
                 "@info(name = 'query1') " +
@@ -234,7 +250,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingInputNameIsConstant() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object, y String);";
+        String inputStream = "define stream InputStream (x String, y String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -259,7 +275,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingOutputNameIsConstant() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object, y String);";
+        String inputStream = "define stream InputStream (x String, y String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -284,7 +300,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingFirstParamIsString() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String query = (
                 "@info(name = 'query1') " +
@@ -304,7 +320,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingInputNameIsString() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -328,7 +344,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingOutputNameIsString() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -352,7 +368,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingAttributeIsVariable() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -377,7 +393,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingNumberOfInputsAndOutputsAreHonoured1() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -402,7 +418,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingNumberOfInputsAndOutputsAreHonoured2() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -427,7 +443,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingInputNameIsPresentInGraphViaSignatureDef() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -451,7 +467,7 @@ public class TensorFlowExtensionTest {
     @Test
     public void validatingOutputNameIsPresentInGraphViaSignatureDef() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x Object);";
+        String inputStream = "define stream InputStream (x String);";
 
         String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
         String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
@@ -471,4 +487,58 @@ public class TensorFlowExtensionTest {
                     "Please check the output node names."));
         }
     }
+
+/*    @Test
+    public void testingTheRobustnessOfStringTo() throws Exception {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inputStream = "define stream InputStream (x String);";
+
+        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
+        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
+
+        String query = (
+                "@info(name = 'query1') " +
+                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputPoint', x) " +
+                        "select outputPoint0, outputPoint1 " +
+                        "insert into OutputStream;"
+        );
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long l, Event[] events, Event[] events1) {
+                EventPrinter.print(events);
+                *//*for (Event event: events) {
+                    count.incrementAndGet();
+                    switch (count.get()) {
+                        case 1:
+                            AssertJUnit.assertArrayEquals(new Float[]{0.49465084f, -0.29043096f}, new Object[]{
+                                    event.getData(0), event.getData(1)});
+                            break;
+                        case 2:
+                            AssertJUnit.assertArrayEquals(new Float[]{0.41562787f, 1.0673156f}, new Object[]{
+                                    event.getData(0), event.getData(1)});
+                            break;
+                        case 3:
+                            AssertJUnit.assertArrayEquals(new Float[]{2.4706075f, 0.86139846f}, new Object[]{
+                                    event.getData(0), event.getData(1)});
+                            break;
+                    }
+                }*//*
+            }
+        });
+
+        siddhiAppRuntime.start();
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
+        try {
+            inputHandler.send(new Object[]{"float:1"});
+//            inputHandler.send(new Object[]{"float:[1, 2]"});
+//            inputHandler.send(new Object[]{"float:[5, 2]"});
+        } catch (Exception e) {
+            logger.error(e.getCause().getMessage());
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }*/
 }
