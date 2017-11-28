@@ -15,8 +15,6 @@ google_analytics:
 pages:
 - Welcome to WSO2 Siddhi Execution TensorFlow: index.md
 - API Docs:
-  - 1.0.8: api/1.0.8.md
-  - 1.0.7: api/1.0.7.md
   - latest: api/latest.md
 - License: LICENSE.md
 theme: material
