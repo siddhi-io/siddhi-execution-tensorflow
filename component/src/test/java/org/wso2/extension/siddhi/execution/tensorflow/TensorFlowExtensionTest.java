@@ -28,7 +28,6 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -64,7 +63,6 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
-                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -120,7 +118,6 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
-                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -170,7 +167,7 @@ public class TensorFlowExtensionTest {
         }
     }
 
-    //preprocessing of the image to convert it to float array
+    //pre-processing of the image to convert it to float array
     private static float[] img2array(BufferedImage bi) {
         float[] floatArray = new float[784];
         for (int i = 0; i < bi.getHeight(); i++) {
@@ -202,7 +199,6 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
-                EventPrinter.print(events);
                 for (Event event: events) {
                     count.incrementAndGet();
                     switch (count.get()) {
@@ -487,58 +483,4 @@ public class TensorFlowExtensionTest {
                     "Please check the output node names."));
         }
     }
-
-/*    @Test
-    public void testingTheRobustnessOfStringTo() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
-        String query = (
-                "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputPoint', x) " +
-                        "select outputPoint0, outputPoint1 " +
-                        "insert into OutputStream;"
-        );
-
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long l, Event[] events, Event[] events1) {
-                EventPrinter.print(events);
-                *//*for (Event event: events) {
-                    count.incrementAndGet();
-                    switch (count.get()) {
-                        case 1:
-                            AssertJUnit.assertArrayEquals(new Float[]{0.49465084f, -0.29043096f}, new Object[]{
-                                    event.getData(0), event.getData(1)});
-                            break;
-                        case 2:
-                            AssertJUnit.assertArrayEquals(new Float[]{0.41562787f, 1.0673156f}, new Object[]{
-                                    event.getData(0), event.getData(1)});
-                            break;
-                        case 3:
-                            AssertJUnit.assertArrayEquals(new Float[]{2.4706075f, 0.86139846f}, new Object[]{
-                                    event.getData(0), event.getData(1)});
-                            break;
-                    }
-                }*//*
-            }
-        });
-
-        siddhiAppRuntime.start();
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
-        try {
-            inputHandler.send(new Object[]{"float:1"});
-//            inputHandler.send(new Object[]{"float:[1, 2]"});
-//            inputHandler.send(new Object[]{"float:[5, 2]"});
-        } catch (Exception e) {
-            logger.error(e.getCause().getMessage());
-        } finally {
-            siddhiAppRuntime.shutdown();
-        }
-    }*/
 }

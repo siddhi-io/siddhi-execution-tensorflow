@@ -46,6 +46,7 @@ import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +77,9 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getR
                 "Since each input is directly used to create a Tensor they should be of compatible shape and " +
                 "data type with the model.\n" +
                 "The information related to input and output nodes can be retrieved from saved model signature def." +
-                "Signature def can be read in Python as follows\n" +
+                "signature_def can be read by using the saved_model_cli commands found at " +
+                "https://www.tensorflow.org/programmers_guide/saved_model\n" +
+                "signature_def can be read in Python as follows\n" +
                 "with tf.Session() as sess:\n" +
                 "  md = tf.saved_model.loader.load(sess, ['serve'], export_dir)\n" +
                 "  sig = md.signature_def[tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]\n" +
@@ -156,7 +159,6 @@ public class TensorFlowExtension extends StreamProcessor {
     private VariableExpressionExecutor[] inputVariableExpressionExecutors;
     private Session tensorFlowSession;
     private SignatureDef signatureDef;
-    private SavedModelBundle tensorFlowSavedModel;
 
     @Override
     protected List<Attribute> init(AbstractDefinition abstractDefinition, ExpressionExecutor[] expressionExecutors,
@@ -187,7 +189,7 @@ public class TensorFlowExtension extends StreamProcessor {
 
         //loading the saved model
         final String servingTag = "serve";
-        tensorFlowSavedModel = SavedModelBundle.load(modelPath, servingTag);
+        SavedModelBundle tensorFlowSavedModel = SavedModelBundle.load(modelPath, servingTag);
         tensorFlowSession = tensorFlowSavedModel.session();
 
         //Loading signatureDef
@@ -286,13 +288,14 @@ public class TensorFlowExtension extends StreamProcessor {
             StreamEvent streamEvent = complexEventChunk.next();
 
             Session.Runner tensorFlowRunner = tensorFlowSession.runner();
+            List<Tensor> inputTensors = new LinkedList<>();
             //getting TensorFlow input values from stream event and feeding the model
             for (int i = 0; i < noOfInputs; i++) {
                 try {
                     Tensor input = createTensor((String) inputVariableExpressionExecutors[i].execute(streamEvent));
+                    inputTensors.add(input);
                     tensorFlowRunner = tensorFlowRunner.feed(
                             signatureDef.getInputsMap().get(inputVariableNamesArray[i]).getName(), input);
-                    //todo: find a way to close tensor
                 } catch (Throwable e) {
                     //catching throwable and logging because we don't want to stop the app if one bad input is given
                     logger.error("Error while feeding input " + inputVariableNamesArray[i] + ". " + e.getMessage());
@@ -308,6 +311,11 @@ public class TensorFlowExtension extends StreamProcessor {
             //Running the session and getting the output tensors
             List<Tensor> outputTensors = tensorFlowRunner.run();
 
+            //Closing the input tensors to release resources (Tensors must be explicitly closed)
+            for (Tensor t : inputTensors) {
+                t.close();
+            }
+
             complexEventPopulater.populateComplexEvent(streamEvent, getOutputObjectArray(outputTensors));
         }
         nextProcessor.process(complexEventChunk);
@@ -315,25 +323,24 @@ public class TensorFlowExtension extends StreamProcessor {
 
     @Override
     public void start() {
-//        tensorFlowSession = tensorFlowSavedModel.session();
+
     }
 
     @Override
     public void stop() {
         //If the model learns with predictions then we need to persist the model and restore.
         //But current TensorFlow Java API r1.4 doesn't support serving of models
-//        tensorFlowSession.close();
+
     }
 
     @Override
     public Map<String, Object> currentState() {
-//        Map<String, Object> map = new HashMap();
-//        map.put("savedModel", tensorFlowSavedModel);
+
         return null;
     }
 
     @Override
     public void restoreState(Map<String, Object> map) {
-//        tensorFlowSavedModel = (SavedModelBundle) map.get("savedModel");
+
     }
 }

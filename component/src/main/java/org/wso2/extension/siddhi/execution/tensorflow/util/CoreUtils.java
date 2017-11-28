@@ -34,6 +34,7 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -231,7 +232,7 @@ public class CoreUtils {
         return shape;
     }
 
-    public static Tensor createTensor(String arrayAsString) {
+    public static Tensor createTensor(String arrayAsString) throws CharacterCodingException {
         long[] shape = getShapeOfArrayAsString(arrayAsString);
         Tensor tensor;
 
