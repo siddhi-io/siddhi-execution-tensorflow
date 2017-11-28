@@ -63,7 +63,8 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getR
         description = "Performs inferences (prediction) from an already built TensorFlow machine learning model. " +
                 "The types of models are unlimited (including image classifiers, deep learning models) as long as " +
                 "they satisfy the following conditions.\n" +
-                "1. They are saved with the tag 'serve' in SavedModel format\n" +
+                "1. They are saved with the tag 'serve' in SavedModel format " +
+                "(See https://www.tensorflow.org/programmers_guide/saved_model)\n" +
                 "2. Model is initially trained and ready for inferences\n" +
                 "3. Inference logic is written and saved in the model\n" +
                 "4. signature_def is properly included in the metaGraphDef (a protocol buffer file which has " +
@@ -207,6 +208,7 @@ public class TensorFlowExtension extends StreamProcessor {
 
         //Checking if the specified number of inputs are given
         final int noOfQueryParams = 1 + 2 * noOfInputs + noOfOutputs;
+        //1 for path param. noOfInputs + noOfPOutputs for names of the nodes. Another noOfInputs for attributes
         if (attributeExpressionLength != noOfQueryParams) {
             String message = "Invalid number of query parameters. Number of inputs and number of outputs are " +
                     "specified as " + noOfInputs + " and " + noOfOutputs + " respectively. So the total number of " +
@@ -273,6 +275,7 @@ public class TensorFlowExtension extends StreamProcessor {
         }
 
         int inputValuesStartIndex = 1 + noOfInputs + noOfOutputs;
+        //1 for path param. noOfInputs + noOfPOutputs for names of the nodes.
 
         //Extracting and validating variable expression executors
         inputVariableExpressionExecutors = CoreUtils.extractAndValidateTensorFlowInputs(attributeExpressionExecutors,
