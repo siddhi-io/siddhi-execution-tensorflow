@@ -146,7 +146,8 @@ public class TensorFlowExtensionTest {
                 imageAsString  = imageAsString + num + ",";
             }
 
-            imageAsString = imageAsString.substring(0, imageAsString.lastIndexOf(",") - 1) + "]";
+            imageAsString = imageAsString.substring(0, imageAsString.lastIndexOf(",")) + "]";
+
 
             float[] keepProbArray = new float[1024];
             Arrays.fill(keepProbArray, 1f);
@@ -157,7 +158,8 @@ public class TensorFlowExtensionTest {
                 keepProbString  = keepProbString + num + ",";
             }
 
-            keepProbString = keepProbString.substring(0, keepProbString.lastIndexOf(",") - 1) + "]";
+            keepProbString = keepProbString.substring(0, keepProbString.lastIndexOf(",")) + "]";
+
 
             inputHandler.send(new Object[]{imageAsString, keepProbString});
         } catch (Exception e) {

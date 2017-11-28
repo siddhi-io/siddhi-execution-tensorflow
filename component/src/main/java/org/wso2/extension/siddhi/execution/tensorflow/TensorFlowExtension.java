@@ -64,7 +64,7 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getR
                 "The types of models are unlimited (including image classifiers, deep learning models) as long as " +
                 "they satisfy the following conditions.\n" +
                 "1. They are saved with the tag 'serve' in SavedModel format " +
-                "(See https://www.tensorflow.org/programmers_guide/saved_model)\n" +
+                "(See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md)\n" +
                 "2. Model is initially trained and ready for inferences\n" +
                 "3. Inference logic is written and saved in the model\n" +
                 "4. signature_def is properly included in the metaGraphDef (a protocol buffer file which has " +
