@@ -90,7 +90,7 @@ public class TensorFlowExtensionTest {
             inputHandler.send(new Object[]{"float:[1, 2]"});
             inputHandler.send(new Object[]{"float:[5, 2]"});
         } catch (Exception e) {
-            logger.error(e.getCause().getMessage());
+            logger.error(e);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -148,7 +148,6 @@ public class TensorFlowExtensionTest {
 
             imageAsString = imageAsString.substring(0, imageAsString.lastIndexOf(",")) + "]";
 
-
             float[] keepProbArray = new float[1024];
             Arrays.fill(keepProbArray, 1f);
 
@@ -160,10 +159,9 @@ public class TensorFlowExtensionTest {
 
             keepProbString = keepProbString.substring(0, keepProbString.lastIndexOf(",")) + "]";
 
-
             inputHandler.send(new Object[]{imageAsString, keepProbString});
         } catch (Exception e) {
-            logger.error(e.getCause().getMessage());
+            logger.error(e);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -218,7 +216,7 @@ public class TensorFlowExtensionTest {
         try {
             inputHandler.send(new Object[]{"double :[1,-2]"});
         } catch (Exception e) {
-            logger.error(e.getCause().getMessage());
+            logger.error(e);
         } finally {
             siddhiAppRuntime.shutdown();
         }

@@ -248,7 +248,7 @@ public class CoreUtils {
         List tempList = new LinkedList();
 
         for (String string : stringArray) {
-            if (string != null && string.length() > 0) {
+            if (string != null && (!string.isEmpty())) {
                 tempList.add(string);
             }
         }
