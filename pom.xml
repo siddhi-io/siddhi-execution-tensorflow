@@ -47,7 +47,7 @@
     <properties>
         <tensorflow.version>1.3.0</tensorflow.version>
         <tensorflow.proto.version>1.4.0</tensorflow.proto.version>
-        <siddhi.version>4.0.4</siddhi.version>
+        <siddhi.version>4.1.38</siddhi.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <testng.version>6.8</testng.version>
         <jacoco.version>0.7.9</jacoco.version>
