@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.wso2.extension.siddhi.execution.tensorflow</groupId>
         <artifactId>siddhi-execution-tensorflow-parent</artifactId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
