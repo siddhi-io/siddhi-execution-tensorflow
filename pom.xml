@@ -27,7 +27,7 @@
 
     <groupId>org.wso2.extension.siddhi.execution.tensorflow</groupId>
     <artifactId>siddhi-execution-tensorflow-parent</artifactId>
-    <version>1.0.8-SNAPSHOT</version>
+    <version>1.0.8</version>
     <packaging>pom</packaging>
     <name>Siddhi Execution TensorFlow Extension Parent</name>
     <url>http://wso2.org</url>
@@ -58,7 +58,7 @@
         <url>https://github.com/wso2-extensions/siddhi-execution-tensorflow.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-execution-tensorflow.git
         </developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.0.8</tag>
     </scm>
 
     <dependencyManagement>
