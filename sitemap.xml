@@ -6,6 +6,11 @@
      <changefreq>daily</changefreq>
     </url>
     <url>
+     <loc>https://wso2-extensions.github.io/siddhi-execution-tensorflow/api/1.0.8/</loc>
+     <lastmod>2018-09-20</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
      <loc>https://wso2-extensions.github.io/siddhi-execution-tensorflow/api/1.0.7/</loc>
      <lastmod>2018-09-20</lastmod>
      <changefreq>daily</changefreq>
