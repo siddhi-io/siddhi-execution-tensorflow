@@ -104,6 +104,7 @@
                             org.wso2.extension.siddhi.execution.tensorflow.*
                         </Export-Package>
                         <Import-Package>
+                            org.wso2.siddhi.core.*;version="${siddhi.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                         <Include-Resource>
