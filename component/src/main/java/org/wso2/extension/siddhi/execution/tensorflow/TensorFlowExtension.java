@@ -19,6 +19,30 @@
 package org.wso2.extension.siddhi.execution.tensorflow;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ReturnAttribute;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
+import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.executor.ConstantExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.processor.ProcessingMode;
+import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.query.processor.stream.StreamProcessor;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.definition.Attribute;
 import org.apache.log4j.Logger;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
@@ -26,29 +50,9 @@ import org.tensorflow.Tensor;
 import org.tensorflow.framework.MetaGraphDef;
 import org.tensorflow.framework.SignatureDef;
 import org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.ReturnAttribute;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
-import org.wso2.siddhi.core.query.processor.Processor;
-import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
-import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.createTensor;
 import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getOutputObjectArray;
@@ -136,22 +140,23 @@ import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getR
                 ),
         },
         examples = {
-            @Example(
-                    syntax = "define stream InputStream (x Object, y Object);\n" +
-                            "@info(name = 'query1') \n" +
-                            "from InputStream#tensorFlow:predict('home/MNIST', 'inputPoint', " +
-                            "'dropout', 'outputPoint', x, y) \n" +
-                            "select outputPoint0, outputPoint1, outputPoint2, outputPoint3, outputPoint4, " +
-                            "outputPoint5, outputPoint6, outputPoint7, outputPoint8, outputPoint9 \n" +
-                            "insert into OutputStream;\n",
-                    description = "This is a query to get inferences from a MNIST model. This model takes in 2 " +
-                            "inputs. One being the image as float array and other is keep probability array and " +
-                            "sends out a Tensor with 10 elements. Our stream processor flattens the tensor and sends " +
-                            "10 floats each representing the probability of image being 0,1,...,9"
-            )
+                @Example(
+                        syntax = "define stream InputStream (x Object, y Object);\n" +
+                                "@info(name = 'query1') \n" +
+                                "from InputStream#tensorFlow:predict('home/MNIST', 'inputPoint', " +
+                                "'dropout', 'outputPoint', x, y) \n" +
+                                "select outputPoint0, outputPoint1, outputPoint2, outputPoint3, outputPoint4, " +
+                                "outputPoint5, outputPoint6, outputPoint7, outputPoint8, outputPoint9 \n" +
+                                "insert into OutputStream;\n",
+                        description = "This is a query to get inferences from a MNIST model. This model takes in 2 " +
+                                "inputs. One being the image as float array and other is keep probability array and " +
+                                "sends out a Tensor with 10 elements. Our stream processor" +
+                                " flattens the tensor and sends " +
+                                "10 floats each representing the probability of image being 0,1,...,9"
+                )
         }
 )
-public class TensorFlowExtension extends StreamProcessor {
+public class TensorFlowExtension extends StreamProcessor<State> {
     private static final Logger logger = Logger.getLogger(TensorFlowExtension.class);
     private String[] inputVariableNamesArray;
     private String[] outputVariableNamesArray;
@@ -160,18 +165,76 @@ public class TensorFlowExtension extends StreamProcessor {
     private VariableExpressionExecutor[] inputVariableExpressionExecutors;
     private Session tensorFlowSession;
     private SignatureDef signatureDef;
+    private List<Attribute> attributeList;
 
     @Override
-    protected List<Attribute> init(AbstractDefinition abstractDefinition, ExpressionExecutor[] expressionExecutors,
-                                   ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+    public void start() {
 
+    }
+
+    @Override
+    public void stop() {
+        //If the model learns with predictions then we need to persist the model and restore.
+        //But current TensorFlow Java API r1.4 doesn't support serving of models
+
+    }
+
+    @Override
+    protected void process(ComplexEventChunk<StreamEvent> complexEventChunk,
+                           Processor processor,
+                           StreamEventCloner streamEventCloner,
+                           ComplexEventPopulater complexEventPopulater,
+                           State state) {
+
+        while (complexEventChunk.hasNext()) {
+            StreamEvent streamEvent = complexEventChunk.next();
+
+            Session.Runner tensorFlowRunner = tensorFlowSession.runner();
+            List<Tensor> inputTensors = new LinkedList<>();
+            //getting TensorFlow input values from stream event and feeding the model
+            for (int i = 0; i < noOfInputs; i++) {
+                try {
+                    Tensor input = createTensor((String) inputVariableExpressionExecutors[i].execute(streamEvent));
+                    inputTensors.add(input);
+                    tensorFlowRunner = tensorFlowRunner.feed(
+                            signatureDef.getInputsMap().get(inputVariableNamesArray[i]).getName(), input);
+                } catch (Throwable e) {
+                    //catching throwable and logging because we don't want to stop the app if one bad input is given
+                    logger.error("Error while feeding input " + inputVariableNamesArray[i] + ". " + e.getMessage());
+                }
+            }
+
+            //fetching all the required outputs
+            for (int i = 0; i < noOfOutputs; i++) {
+                tensorFlowRunner = tensorFlowRunner.fetch(
+                        signatureDef.getOutputsMap().get(outputVariableNamesArray[i]).getName());
+            }
+
+            //Running the session and getting the output tensors
+            List<Tensor> outputTensors = tensorFlowRunner.run();
+
+            //Closing the input tensors to release resources (Tensors must be explicitly closed)
+            for (Tensor t : inputTensors) {
+                t.close();
+            }
+
+            complexEventPopulater.populateComplexEvent(streamEvent, getOutputObjectArray(outputTensors));
+        }
+        nextProcessor.process(complexEventChunk);
+    }
+
+    @Override
+    protected StateFactory<State> init(MetaStreamEvent metaStreamEvent, AbstractDefinition abstractDefinition,
+                                       ExpressionExecutor[] expressionExecutors, ConfigReader configReader,
+                                       StreamEventClonerHolder streamEventClonerHolder, boolean b, boolean b1,
+                                       SiddhiQueryContext siddhiQueryContext) {
         final int minConstantParams = 3;
 
         //Checking if at least minimum number of constant params are present in the query
         if (attributeExpressionLength < minConstantParams) {
             String message = "Insufficient number of parameters. Query should have at least 5 constant parameters " +
                     "and appropriate number of variable parameters but given " + attributeExpressionLength;
-            logger.error(siddhiAppContext.getName() + message);
+            logger.error(siddhiQueryContext.getSiddhiAppContext().getName() + message);
             throw new SiddhiAppCreationException(message);
         }
 
@@ -213,7 +276,7 @@ public class TensorFlowExtension extends StreamProcessor {
             String message = "Invalid number of query parameters. Number of inputs and number of outputs are " +
                     "specified as " + noOfInputs + " and " + noOfOutputs + " respectively. So the total number of " +
                     "query parameters should be " + noOfQueryParams + " but " + attributeExpressionLength + " given.";
-            logger.error(siddhiAppContext.getName() + message);
+            logger.error(siddhiQueryContext.getSiddhiAppContext().getName() + message);
             throw new SiddhiAppCreationException(message);
         }
 
@@ -273,77 +336,24 @@ public class TensorFlowExtension extends StreamProcessor {
                         "check the output node names.");
             }
         }
-
         int inputValuesStartIndex = 1 + noOfInputs + noOfOutputs;
         //1 for path param. noOfInputs + noOfPOutputs for names of the nodes.
 
         //Extracting and validating variable expression executors
         inputVariableExpressionExecutors = CoreUtils.extractAndValidateTensorFlowInputs(attributeExpressionExecutors,
                 inputValuesStartIndex, noOfInputs);
-
-        return getReturnAttributeList(signatureDef, noOfOutputs, tensorFlowSavedModel, outputVariableNamesArray);
-    }
-
-    @Override
-    protected void process(ComplexEventChunk<StreamEvent> complexEventChunk, Processor processor,
-                           StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
-        while (complexEventChunk.hasNext()) {
-            StreamEvent streamEvent = complexEventChunk.next();
-
-            Session.Runner tensorFlowRunner = tensorFlowSession.runner();
-            List<Tensor> inputTensors = new LinkedList<>();
-            //getting TensorFlow input values from stream event and feeding the model
-            for (int i = 0; i < noOfInputs; i++) {
-                try {
-                    Tensor input = createTensor((String) inputVariableExpressionExecutors[i].execute(streamEvent));
-                    inputTensors.add(input);
-                    tensorFlowRunner = tensorFlowRunner.feed(
-                            signatureDef.getInputsMap().get(inputVariableNamesArray[i]).getName(), input);
-                } catch (Throwable e) {
-                    //catching throwable and logging because we don't want to stop the app if one bad input is given
-                    logger.error("Error while feeding input " + inputVariableNamesArray[i] + ". " + e.getMessage());
-                }
-            }
-
-            //fetching all the required outputs
-            for (int i = 0; i < noOfOutputs; i++) {
-                tensorFlowRunner = tensorFlowRunner.fetch(
-                        signatureDef.getOutputsMap().get(outputVariableNamesArray[i]).getName());
-            }
-
-            //Running the session and getting the output tensors
-            List<Tensor> outputTensors = tensorFlowRunner.run();
-
-            //Closing the input tensors to release resources (Tensors must be explicitly closed)
-            for (Tensor t : inputTensors) {
-                t.close();
-            }
-
-            complexEventPopulater.populateComplexEvent(streamEvent, getOutputObjectArray(outputTensors));
-        }
-        nextProcessor.process(complexEventChunk);
-    }
-
-    @Override
-    public void start() {
-
-    }
-
-    @Override
-    public void stop() {
-        //If the model learns with predictions then we need to persist the model and restore.
-        //But current TensorFlow Java API r1.4 doesn't support serving of models
-
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-
+        attributeList = getReturnAttributeList(signatureDef, noOfOutputs, tensorFlowSavedModel,
+                outputVariableNamesArray);
         return null;
     }
 
     @Override
-    public void restoreState(Map<String, Object> map) {
+    public List<Attribute> getReturnAttributes() {
+        return attributeList;
+    }
 
+    @Override
+    public ProcessingMode getProcessingMode() {
+        return ProcessingMode.BATCH;
     }
 }
