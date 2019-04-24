@@ -13,7 +13,7 @@
         <meta name="description" content="Siddhi Execution TensorFlow Extension">
       
       
-        <link rel="canonical" href="https://wso2-extensions.github.io/siddhi-execution-tensorflow/api/1.0.0/">
+        <link rel="canonical" href="https://wso2-extensions.github.io/siddhi-execution-tensorflow/api/2.0.0/">
       
       
         <meta name="author" content="WSO2">
@@ -42,7 +42,7 @@
     
     
       
-        <title>1.0.0 - Siddhi Execution TensorFlow</title>
+        <title>2.0.0 - Siddhi Execution TensorFlow</title>
       
     
     
@@ -106,7 +106,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v100" tabindex="1" class="md-skip">
+      <a href="#api-docs-v200" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -132,7 +132,7 @@
                 Siddhi Execution TensorFlow
               </span>
               <span class="md-header-nav__topic">
-                1.0.0
+                2.0.0
               </span>
             
           
@@ -280,11 +280,62 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../2.0.0/" title="2.0.0" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        2.0.0
+      </label>
+    
+    <a href="./" title="2.0.0" class="md-nav__link md-nav__link--active">
       2.0.0
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tensorflow" title="Tensorflow" class="md-nav__link">
+    Tensorflow
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predict-stream-processor" title="predict (Stream Processor)" class="md-nav__link">
+    predict (Stream Processor)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -412,62 +463,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        1.0.0
-      </label>
-    
-    <a href="./" title="1.0.0" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../1.0.0/" title="1.0.0" class="md-nav__link">
       1.0.0
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#tensorflow" title="Tensorflow" class="md-nav__link">
-    Tensorflow
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#predict-stream-processor" title="predict (Stream Processor)" class="md-nav__link">
-    predict (Stream Processor)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -556,12 +556,12 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/wso2-extensions/siddhi-execution-tensorflow/edit/master/docs/api/1.0.0.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/wso2-extensions/siddhi-execution-tensorflow/edit/master/docs/api/2.0.0.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v100">API Docs - v1.0.0<a class="headerlink" href="#api-docs-v100" title="Permanent link">&para;</a></h1>
+                <h1 id="api-docs-v200">API Docs - v2.0.0<a class="headerlink" href="#api-docs-v200" title="Permanent link">&para;</a></h1>
 <h2 id="tensorflow">Tensorflow<a class="headerlink" href="#tensorflow" title="Permanent link">&para;</a></h2>
-<h3 id="predict-stream-processor">predict <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#stream-processor">(Stream Processor)</a></em><a class="headerlink" href="#predict-stream-processor" title="Permanent link">&para;</a></h3>
+<h3 id="predict-stream-processor">predict <em><a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#stream-processor">(Stream Processor)</a></em><a class="headerlink" href="#predict-stream-processor" title="Permanent link">&para;</a></h3>
 <p style="word-wrap: break-word">Performs inferences (prediction) from an already built TensorFlow machine learning model. The types of models are unlimited (including image classifiers, deep learning models) as long as they satisfy the following conditions.<br>1. They are saved with the tag 'serve' in SavedModel format (See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md)<br>2. Model is initially trained and ready for inferences<br>3. Inference logic is written and saved in the model<br>4. signature_def is properly included in the metaGraphDef (a protocol buffer file which has information about the graph) and the key for prediction signature def is 'serving-default'<br><br>Also the prerequisites for inference are as follows.<br>1. User knows the names of the input and output nodes<br>2. Has a preprocessed data set of Java primitive types or their multidimensional arrays<br><br>Since each input is directly used to create a Tensor they should be of compatible shape and data type with the model.<br>The information related to input and output nodes can be retrieved from saved model signature def.signature_def can be read by using the saved_model_cli commands found at https://www.tensorflow.org/programmers_guide/saved_model<br>signature_def can be read in Python as follows<br>with tf.Session() as sess:<br>&nbsp;&nbsp;md = tf.saved_model.loader.load(sess, ['serve'], export_dir)<br>&nbsp;&nbsp;sig = md.signature_def[tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]<br>&nbsp;&nbsp;print(sig)<br><br>Or you can read signature def from Java as follows,<br>final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = "serving_default"; <br><br>final SignatureDef sig =<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MetaGraphDef.parseFrom(model.metaGraphDef())<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.getSignatureDefOrThrow(DEFAULT_SERVING_SIGNATURE_DEF_KEY);<br><br>You will have to import the following in Java.<br>import org.tensorflow.framework.MetaGraphDef;<br>import org.tensorflow.framework.SignatureDef;</p>
 
 <p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
@@ -656,7 +656,7 @@ insert into OutputStream;
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../1.0.1/" title="1.0.1" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../.." title="Welcome" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -665,19 +665,19 @@ insert into OutputStream;
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                1.0.1
+                Welcome
               </span>
             </div>
           </a>
         
         
-          <a href="../latest/" title="latest" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../1.1.1/" title="1.1.1" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                latest
+                1.1.1
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
