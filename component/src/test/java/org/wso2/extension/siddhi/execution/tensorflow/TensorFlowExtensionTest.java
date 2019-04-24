@@ -18,16 +18,16 @@
 
 package org.wso2.extension.siddhi.execution.tensorflow;
 
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.query.output.callback.QueryCallback;
+import io.siddhi.core.stream.input.InputHandler;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.query.output.callback.QueryCallback;
-import org.wso2.siddhi.core.stream.input.InputHandler;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -56,7 +56,7 @@ public class TensorFlowExtensionTest {
                         "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputPoint', x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
-                );
+        );
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
 
@@ -123,9 +123,9 @@ public class TensorFlowExtensionTest {
                     switch (count.get()) {
                         case 1:
                             AssertJUnit.assertArrayEquals(new Float[]{1.0539598f, -2.2724361f, 2.1548953f, -0.71338075f,
-                                    2.6006677f, 1.2193193f, 2.585527f, 2.5818956f, -0.32108462f, 0.8956634f},
+                                            2.6006677f, 1.2193193f, 2.585527f, 2.5818956f, -0.32108462f, 0.8956634f},
                                     new Object[]{
-                                    event.getData(0), event.getData(1), event.getData(2), event.getData(3),
+                                            event.getData(0), event.getData(1), event.getData(2), event.getData(3),
                                             event.getData(4), event.getData(5), event.getData(6),
                                             event.getData(7), event.getData(8), event.getData(9)});
                             break;
@@ -239,7 +239,7 @@ public class TensorFlowExtensionTest {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
             AssertJUnit.assertTrue(e.getCause().getMessage().contains("1st query parameter is the absolute path " +
                     "to model which has to be constant but found " +
-                    "org.wso2.siddhi.core.executor.VariableExpressionExecutor"));
+                    "io.siddhi.core.executor.VariableExpressionExecutor"));
         }
     }
 
@@ -263,7 +263,7 @@ public class TensorFlowExtensionTest {
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
             AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 2 is a input " +
-                    "name which has to be a constant but found org.wso2.siddhi.core.executor" +
+                    "name which has to be a constant but found io.siddhi.core.executor" +
                     ".VariableExpressionExecutor"));
         }
     }
@@ -288,7 +288,7 @@ public class TensorFlowExtensionTest {
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
             AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 3 is a output " +
-                    "name which has to be a constant but found org.wso2.siddhi.core.executor" +
+                    "name which has to be a constant but found io.siddhi.core.executor" +
                     ".VariableExpressionExecutor"));
         }
     }
@@ -382,7 +382,7 @@ public class TensorFlowExtensionTest {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
             AssertJUnit.assertTrue(e.getCause().getMessage().contains("The parameter at index 4 is not a variable " +
                     "attribute (VariableExpressionExecutor) present in the stream definition. " +
-                    "Found org.wso2.siddhi.core.executor.ConstantExpressionExecutor"));
+                    "Found io.siddhi.core.executor.ConstantExpressionExecutor"));
         }
     }
 
@@ -431,7 +431,7 @@ public class TensorFlowExtensionTest {
         } catch (Exception e) {
             AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
             AssertJUnit.assertTrue(e.getCause().getMessage().contains("The query parameter of index 3 is a output " +
-                    "name which has to be a constant but found org.wso2.siddhi.core.executor" +
+                    "name which has to be a constant but found io.siddhi.core.executor" +
                     ".VariableExpressionExecutor"));
         }
     }
