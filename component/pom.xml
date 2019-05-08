@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.wso2.extension.siddhi.execution.tensorflow</groupId>
+        <groupId>io.siddhi.extension.execution.tensorflow</groupId>
         <artifactId>siddhi-execution-tensorflow-parent</artifactId>
         <version>2.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -101,7 +101,7 @@
                             org.tensorflow.*
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.extension.siddhi.execution.tensorflow.*
+                            io.siddhi.extension.execution.tensorflow.*
                         </Export-Package>
                         <Import-Package>
                             io.siddhi.core.*;version="${siddhi.version.range}",

@@ -24,7 +24,7 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 
 ```
      <dependency>
-        <groupId>org.wso2.extension.siddhi.execution.tensorflow</groupId>
+        <groupId>io.siddhi.extension.execution.tensorflow</groupId>
         <artifactId>siddhi-execution-tensorflow</artifactId>
         <version>x.x.x</version>
      </dependency>
