@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.extension.siddhi.execution.tensorflow;
+package io.siddhi.extension.execution.tensorflow;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.siddhi.annotation.Example;
@@ -41,6 +41,7 @@ import io.siddhi.core.query.processor.stream.StreamProcessor;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.extension.execution.tensorflow.util.CoreUtils;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import org.apache.log4j.Logger;
@@ -49,14 +50,13 @@ import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.framework.MetaGraphDef;
 import org.tensorflow.framework.SignatureDef;
-import org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.createTensor;
-import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getOutputObjectArray;
-import static org.wso2.extension.siddhi.execution.tensorflow.util.CoreUtils.getReturnAttributeList;
+import static io.siddhi.extension.execution.tensorflow.util.CoreUtils.createTensor;
+import static io.siddhi.extension.execution.tensorflow.util.CoreUtils.getOutputObjectArray;
+import static io.siddhi.extension.execution.tensorflow.util.CoreUtils.getReturnAttributeList;
 
 /***
  * Stream processor extension to support inferences from TensorFlow models
