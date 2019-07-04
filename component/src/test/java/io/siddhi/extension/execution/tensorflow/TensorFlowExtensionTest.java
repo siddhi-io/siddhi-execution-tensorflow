@@ -293,7 +293,7 @@ public class TensorFlowExtensionTest {
         }
     }
 
-    @Test
+    @Test (expectedExceptions = {SiddhiAppCreationException.class})
     public void validatingFirstParamIsString() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
@@ -304,13 +304,8 @@ public class TensorFlowExtensionTest {
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-        try {
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-        } catch (Exception e) {
-            AssertJUnit.assertTrue(e instanceof SiddhiAppCreationException);
-            AssertJUnit.assertTrue(e.getCause().getMessage().contains("1st query parameter is the absolute path to " +
-                    "model which has to be of type String but found INT"));
-        }
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
     }
 
     @Test
