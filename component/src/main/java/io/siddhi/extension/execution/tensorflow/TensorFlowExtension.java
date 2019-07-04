@@ -22,6 +22,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -104,27 +105,40 @@ import static io.siddhi.extension.execution.tensorflow.util.CoreUtils.getReturnA
                 @Parameter(
                         name = "absolute.path.to.model",
                         description = "This is the absolute path to the model folder in the local machine.",
-                        type = {DataType.STRING}
+                        type = {DataType.STRING},
+                        dynamic = true
                 ),
                 @Parameter(
                         name = "input.node.names",
                         description = "This is a variable length parameter. The names of the input nodes as comma " +
                                 "separated strings.",
+                        optional = true,
+                        dynamic = true,
+                        defaultValue = "-",
                         type = {DataType.STRING}
                 ),
                 @Parameter(
                         name = "output.node.names",
                         description = "This is a variable length parameter. The names of the output nodes as comma " +
                                 "separated strings.",
+                        optional = true,
+                        dynamic = true,
+                        defaultValue = "-",
                         type = {DataType.STRING}
                 ),
                 @Parameter(
-                        name = "attributes",
+                        name = "attribute",
                         description = "This is a variable length parameter. These are the attributes coming with " +
                                 "events. Note that arrays should be cast to objects and sent.",
                         type = {DataType.INT, DataType.STRING, DataType.DOUBLE, DataType.LONG, DataType.FLOAT,
-                                DataType.BOOL, DataType.OBJECT}
+                                DataType.BOOL, DataType.OBJECT},
+                        dynamic = true
                 ),
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"absolute.path.to.model", "input.node.names",
+                        "output.node.names", "attribute", "..."}),
+                @ParameterOverload(parameterNames = {"absolute.path.to.model", "attribute", "..."})
         },
         returnAttributes = {
                 @ReturnAttribute(

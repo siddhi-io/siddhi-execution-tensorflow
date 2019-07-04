@@ -1,13 +1,13 @@
 site_name: Siddhi Execution TensorFlow
 site_description: Siddhi Execution TensorFlow Extension
 site_author: WSO2
-site_url: https://wso2-extensions.github.io/siddhi-execution-tensorflow/
+site_url: https://siddhi-io.github.io/siddhi-execution-tensorflow/
 extra_css:
 - stylesheets/extra.css
 extra_javascript:
 - javascripts/extra.js
 repo_name: Siddhi-Execution-TensorFlow
-repo_url: https://github.com/wso2-extensions/siddhi-execution-tensorflow
+repo_url: https://github.com/siddhi-io/siddhi-execution-tensorflow
 copyright: Copyright &copy; 2011 - 2018 WSO2
 theme:
   name: material
