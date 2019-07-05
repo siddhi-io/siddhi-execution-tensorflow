@@ -1,37 +1,39 @@
 site_name: Siddhi Execution TensorFlow
 site_description: Siddhi Execution TensorFlow Extension
-site_author: WSO2
-site_url: https://siddhi-io.github.io/siddhi-execution-tensorflow/
-extra_css:
-- stylesheets/extra.css
-extra_javascript:
-- javascripts/extra.js
-repo_name: Siddhi-Execution-TensorFlow
-repo_url: https://github.com/siddhi-io/siddhi-execution-tensorflow
-copyright: Copyright &copy; 2011 - 2018 WSO2
+repo_name: Siddhi Execution Tensorflow
+repo_url: https://github.com/siddhi-io/siddhi-execution-tensorflow/
+edit_uri: https://github.com/siddhi-io/siddhi-execution-tensorflow/blob/master/
+copyright: Siddhi - Documentation
 theme:
   name: material
-  logo: images/siddhi-logo-w.svg
+  logo: images/siddhi-logo.svg
   favicon: images/favicon.ico
   palette:
     primary: teal
     accent: teal
-google_analytics:
-- UA-103065-28
-- auto
+extra_css:
+- assets/stylesheets/extra.css
+extra_javascript:
+- assets/javascripts/extra.js
 extra:
   social:
   - type: github
-    link: https://github.com/wso2/siddhi
+    link: https://github.com/siddhi-io/siddhi
+  - type: medium
+    link: https://medium.com/siddhi-io
+  - type: twitter
+    link: https://twitter.com/siddhi_io
   - type: linkedin
     link: https://www.linkedin.com/groups/13553064
+google_analytics:
+- UA-103065-28
+- auto
 markdown_extensions:
-- admonition
-- toc(permalink=true)
-- codehilite(guess_lang=false)
+- markdown.extensions.admonition
 pages:
-- Welcome: index.md
+- Information: index.md
 - API Docs:
+  - latest: api/latest.md
   - 2.0.0: api/2.0.0.md
   - 1.1.1: api/1.1.1.md
   - 1.1.0: api/1.1.0.md
@@ -44,5 +46,4 @@ pages:
   - 1.0.2: api/1.0.2.md
   - 1.0.1: api/1.0.1.md
   - 1.0.0: api/1.0.0.md
-  - latest: api/latest.md
-- License: LICENSE.md
+- License: license.md

@@ -68,13 +68,12 @@ import static io.siddhi.extension.execution.tensorflow.util.CoreUtils.getReturnA
         description = "Performs inferences (prediction) from an already built TensorFlow machine learning model. " +
                 "The types of models are unlimited (including image classifiers, deep learning models) as long as " +
                 "they satisfy the following conditions.\n" +
-                "1. They are saved with the tag 'serve' in SavedModel format " +
-                "(See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md)\n" +
+                "1. They are saved with the tag 'serve' in SavedModel format for more info see [here]" +
+                "(https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md).\n" +
                 "2. Model is initially trained and ready for inferences\n" +
                 "3. Inference logic is written and saved in the model\n" +
                 "4. signature_def is properly included in the metaGraphDef (a protocol buffer file which has " +
-                "information about the graph) and the key for prediction signature " +
-                "def is 'serving-default'\n" +
+                "information about the graph) and the key for prediction signature def is 'serving-default'\n" +
                 "\n" +
                 "Also the prerequisites for inference are as follows.\n" +
                 "1. User knows the names of the input and output nodes\n" +
@@ -84,23 +83,28 @@ import static io.siddhi.extension.execution.tensorflow.util.CoreUtils.getReturnA
                 "data type with the model.\n" +
                 "The information related to input and output nodes can be retrieved from saved model signature def." +
                 "signature_def can be read by using the saved_model_cli commands found at " +
-                "https://www.tensorflow.org/programmers_guide/saved_model\n" +
+                "[https://www.tensorflow.org/programmers_guide/saved_model]" +
+                "(https://www.tensorflow.org/programmers_guide/saved_model).\n" +
                 "signature_def can be read in Python as follows\n" +
+                "```" +
                 "with tf.Session() as sess:\n" +
                 "  md = tf.saved_model.loader.load(sess, ['serve'], export_dir)\n" +
                 "  sig = md.signature_def[tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]\n" +
                 "  print(sig)\n" +
+                "```" +
                 "\n" +
                 "Or you can read signature def from Java as follows,\n" +
+                "```" +
                 "final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = \"serving_default\"; \n" +
                 "\n" +
                 "final SignatureDef sig =\n" +
                 "      MetaGraphDef.parseFrom(model.metaGraphDef())\n" +
                 "          .getSignatureDefOrThrow(DEFAULT_SERVING_SIGNATURE_DEF_KEY);\n" +
+                "```" +
                 "\n" +
                 "You will have to import the following in Java.\n" +
-                "import org.tensorflow.framework.MetaGraphDef;\n" +
-                "import org.tensorflow.framework.SignatureDef;",
+                "`import org.tensorflow.framework.MetaGraphDef;`\n" +
+                "`import org.tensorflow.framework.SignatureDef;`",
         parameters = {
                 @Parameter(
                         name = "absolute.path.to.model",
