@@ -86,22 +86,19 @@ import static io.siddhi.extension.execution.tensorflow.util.CoreUtils.getReturnA
                 "[https://www.tensorflow.org/programmers_guide/saved_model]" +
                 "(https://www.tensorflow.org/programmers_guide/saved_model).\n" +
                 "signature_def can be read in Python as follows\n" +
-                "```" +
+                "```\n" +
                 "with tf.Session() as sess:\n" +
                 "  md = tf.saved_model.loader.load(sess, ['serve'], export_dir)\n" +
                 "  sig = md.signature_def[tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]\n" +
                 "  print(sig)\n" +
-                "```" +
-                "\n" +
+                "```\n" +
                 "Or you can read signature def from Java as follows,\n" +
-                "```" +
-                "final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = \"serving_default\"; \n" +
-                "\n" +
+                "```\n" +
+                "final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = \"serving_default\";\n" +
                 "final SignatureDef sig =\n" +
                 "      MetaGraphDef.parseFrom(model.metaGraphDef())\n" +
                 "          .getSignatureDefOrThrow(DEFAULT_SERVING_SIGNATURE_DEF_KEY);\n" +
-                "```" +
-                "\n" +
+                "```\n" +
                 "You will have to import the following in Java.\n" +
                 "`import org.tensorflow.framework.MetaGraphDef;`\n" +
                 "`import org.tensorflow.framework.SignatureDef;`",
