@@ -28,7 +28,7 @@ with tf.Session() as sess:
   md = tf.saved_model.loader.load(sess, ['serve'], export_dir)
   sig = md.signature_def[tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]
   print(sig)
-</pre><br><br>Or you can read signature def from Java as follows,<br><pre>
+</pre><br>Or you can read signature def from Java as follows,<br><pre>
 final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = "serving_default";
 final SignatureDef sig =
       MetaGraphDef.parseFrom(model.metaGraphDef())
