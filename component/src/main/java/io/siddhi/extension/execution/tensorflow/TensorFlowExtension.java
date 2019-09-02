@@ -226,7 +226,7 @@ public class TensorFlowExtension extends StreamProcessor<State> {
             }
 
             //Running the session and getting the output tensors
-            List<Tensor> outputTensors = tensorFlowRunner.run();
+            List outputTensors = tensorFlowRunner.run();
 
             //Closing the input tensors to release resources (Tensors must be explicitly closed)
             for (Tensor t : inputTensors) {
