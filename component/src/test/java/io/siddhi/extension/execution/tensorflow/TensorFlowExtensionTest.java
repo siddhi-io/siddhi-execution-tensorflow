@@ -18,6 +18,7 @@
 
 package io.siddhi.extension.execution.tensorflow;
 
+import com.google.common.io.Resources;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
@@ -269,7 +270,6 @@ public class TensorFlowExtensionTest {
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
@@ -290,7 +290,6 @@ public class TensorFlowExtensionTest {
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
     }
 
@@ -305,7 +304,6 @@ public class TensorFlowExtensionTest {
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
