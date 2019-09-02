@@ -25,11 +25,13 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
@@ -56,7 +58,7 @@ public class TensorFlowExtensionTest {
                         "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputPoint', x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
-        );
+                );
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
 
@@ -100,13 +102,12 @@ public class TensorFlowExtensionTest {
     public void initialTestingWithMNIST() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String, y String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/MNIST";
+        URL modelUrl = Resources.getResource("TensorFlowModels/MNIST");
+        URL inputImage = Resources.getResource("04.png");
 
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', " +
                         "'dropout', 'outputPoint', x, y) " +
                         "select outputPoint0, outputPoint1, outputPoint2, outputPoint3, outputPoint4, " +
                         "outputPoint5, outputPoint6, outputPoint7, outputPoint8, outputPoint9 " +
@@ -122,14 +123,26 @@ public class TensorFlowExtensionTest {
                     count.incrementAndGet();
                     switch (count.get()) {
                         case 1:
+                            Object[] output =  new Object[]{
+                                    event.getData(0), event.getData(1), event.getData(2), event.getData(3),
+                                    event.getData(4), event.getData(5), event.getData(6),
+                                    event.getData(7), event.getData(8), event.getData(9)};
                             AssertJUnit.assertArrayEquals(new Float[]{1.0539598f, -2.2724361f, 2.1548953f, -0.71338075f,
-                                            2.6006677f, 1.2193193f, 2.585527f, 2.5818956f, -0.32108462f, 0.8956634f},
-                                    new Object[]{
-                                            event.getData(0), event.getData(1), event.getData(2), event.getData(3),
-                                            event.getData(4), event.getData(5), event.getData(6),
-                                            event.getData(7), event.getData(8), event.getData(9)});
+                                    2.6006677f, 1.2193193f, 2.585527f, 2.5818956f, -0.32108462f, 0.8956634f},
+                                    output);
+                            float max = 0;
+                            int largest = 0;
+                            for (int i = 0; i < output.length; i++) {
+                                if ((float) output[i] > max) {
+                                    max = (float) output[i];
+                                    largest = i;
+                                }
+                            }
+                            Assert.assertEquals(largest, 4);
+                            logger.info("Input image is classified as :" + largest);
                             break;
                     }
+
                 }
             }
         });
@@ -137,26 +150,22 @@ public class TensorFlowExtensionTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
         try {
-            BufferedImage image = ImageIO.read(TensorFlowExtensionTest.class.getResource("/10.png"));
+            BufferedImage image = ImageIO.read(inputImage);
             float[] imgAsFloatArray = img2array(image);
 
             String imageAsString = "float:[";
-
             for (float num : imgAsFloatArray) {
                 imageAsString  = imageAsString + num + ",";
             }
-
             imageAsString = imageAsString.substring(0, imageAsString.lastIndexOf(",")) + "]";
 
             float[] keepProbArray = new float[1024];
             Arrays.fill(keepProbArray, 1f);
 
             String keepProbString = "float:[";
-
             for (float num : keepProbArray) {
                 keepProbString  = keepProbString + num + ",";
             }
-
             keepProbString = keepProbString.substring(0, keepProbString.lastIndexOf(",")) + "]";
 
             inputHandler.send(new Object[]{imageAsString, keepProbString});
