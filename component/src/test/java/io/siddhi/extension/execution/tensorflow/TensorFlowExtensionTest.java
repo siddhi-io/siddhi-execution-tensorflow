@@ -46,22 +46,18 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void initialTestingWithKMeansModel() throws Exception {
+    public void initialTestingWithKMeansModel() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputPoint', x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', " +
+                        "'outputPoint', x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
                 );
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
@@ -84,7 +80,6 @@ public class TensorFlowExtensionTest {
                 }
             }
         });
-
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
         try {
@@ -99,12 +94,11 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void initialTestingWithMNIST() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (x String, y String);";
+    public void initialTestingWithMNIST() {
         URL modelUrl = Resources.getResource("TensorFlowModels/MNIST");
         URL inputImage = Resources.getResource("04.png");
-
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inputStream = "define stream InputStream (x String, y String);";
         String query = (
                 "@info(name = 'query1') " +
                         "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', " +
@@ -113,9 +107,7 @@ public class TensorFlowExtensionTest {
                         "outputPoint5, outputPoint6, outputPoint7, outputPoint8, outputPoint9 " +
                         "insert into OutputStream;"
         );
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
@@ -130,6 +122,7 @@ public class TensorFlowExtensionTest {
                             AssertJUnit.assertArrayEquals(new Float[]{1.0539598f, -2.2724361f, 2.1548953f, -0.71338075f,
                                     2.6006677f, 1.2193193f, 2.585527f, 2.5818956f, -0.32108462f, 0.8956634f},
                                     output);
+                            //Check for position of maximum confidence. Array index represents the actual value.
                             float max = 0;
                             int largest = 0;
                             for (int i = 0; i < output.length; i++) {
@@ -142,11 +135,9 @@ public class TensorFlowExtensionTest {
                             logger.info("Input image is classified as :" + largest);
                             break;
                     }
-
                 }
             }
         });
-
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
         try {
@@ -188,23 +179,19 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void initialTestingWithRegressionModel() throws Exception {
+    public void initialTestingWithRegressionModel() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/Regression");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/Regression";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', " +
                         "'outputPoint', x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long l, Event[] events, Event[] events1) {
@@ -219,7 +206,6 @@ public class TensorFlowExtensionTest {
                 }
             }
         });
-
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("InputStream");
         try {
@@ -232,10 +218,9 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingFirstParamIsConstant() throws Exception {
+    public void validatingFirstParamIsConstant() {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String, y String);";
-
         String query = (
                 "@info(name = 'query1') " +
                         "from InputStream#tensorFlow:predict(y, 'inputPoint', 'outputPoint', x) " +
@@ -253,20 +238,16 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingInputNameIsConstant() throws Exception {
+    public void validatingInputNameIsConstant() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String, y String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', y, 'outputPoint', x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', y, 'outputPoint', x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
@@ -278,16 +259,13 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingOutputNameIsConstant() throws Exception {
+    public void validatingOutputNameIsConstant() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String, y String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', y, x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', y, x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
@@ -306,7 +284,6 @@ public class TensorFlowExtensionTest {
     public void validatingFirstParamIsString() throws Exception {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
         String query = (
                 "@info(name = 'query1') " +
                         "from InputStream#tensorFlow:predict(2, 'inputPoint', 'outputPoint', x) " +
@@ -318,16 +295,13 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingInputNameIsString() throws Exception {
+    public void validatingInputNameIsString() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 5, 'outputPoint', x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 5, 'outputPoint', x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
@@ -342,20 +316,16 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingOutputNameIsString() throws Exception {
+    public void validatingOutputNameIsString() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', true, x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', true, x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
@@ -366,20 +336,17 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingAttributeIsVariable() throws Exception {
+    public void validatingAttributeIsVariable() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputPoint', 4) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', " +
+                        "'outputPoint', 4) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
@@ -391,20 +358,16 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingNumberOfInputsAndOutputsAreHonoured1() throws Exception {
+    public void validatingNumberOfInputsAndOutputsAreHonoured1() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
@@ -416,16 +379,13 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingNumberOfInputsAndOutputsAreHonoured2() throws Exception {
+    public void validatingNumberOfInputsAndOutputsAreHonoured2() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', x, x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputPoint', x, x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
@@ -441,20 +401,17 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingInputNameIsPresentInGraphViaSignatureDef() throws Exception {
+    public void validatingInputNameIsPresentInGraphViaSignatureDef() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputX', 'outputPoint', x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', 'inputX', " +
+                        "'outputPoint', x) " +
                         "select outputPoint0, outputPoint1 " +
                         "insert into OutputStream;"
         );
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
@@ -465,20 +422,17 @@ public class TensorFlowExtensionTest {
     }
 
     @Test
-    public void validatingOutputNameIsPresentInGraphViaSignatureDef() throws Exception {
+    public void validatingOutputNameIsPresentInGraphViaSignatureDef() {
+        URL modelUrl = Resources.getResource("TensorFlowModels/KMeans");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream InputStream (x String);";
-
-        String tempPath = TensorFlowExtensionTest.class.getResource("/10.png").getPath();
-        String path = tempPath.substring(0, tempPath.lastIndexOf("/")) + "/TensorFlowModels/KMeans";
-
         String query = (
                 "@info(name = 'query1') " +
-                        "from InputStream#tensorFlow:predict('" + path + "', 'inputPoint', 'outputX', x) " +
+                        "from InputStream#tensorFlow:predict('" + modelUrl.getPath() + "', " +
+                        "'inputPoint', 'outputX', x) " +
                         "select outputX0, outputX9 " +
                         "insert into OutputStream;"
         );
-
         try {
             SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         } catch (Exception e) {
