@@ -38,7 +38,7 @@
     
     
       
-        <title>1.0.6 - Siddhi Execution TensorFlow</title>
+        <title>2.0.2 - Siddhi Execution TensorFlow</title>
       
     
     
@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v106" tabindex="1" class="md-skip">
+      <a href="#api-docs-v202" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -140,7 +140,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                1.0.6
+                2.0.2
               
             </span>
           
@@ -294,11 +294,62 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../2.0.2/" title="2.0.2" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        2.0.2
+      </label>
+    
+    <a href="./" title="2.0.2" class="md-nav__link md-nav__link--active">
       2.0.2
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tensorflow" title="Tensorflow" class="md-nav__link">
+    Tensorflow
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predict-stream-processor" title="predict (Stream Processor)" class="md-nav__link">
+    predict (Stream Processor)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -378,62 +429,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        1.0.6
-      </label>
-    
-    <a href="./" title="1.0.6" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../1.0.6/" title="1.0.6" class="md-nav__link">
       1.0.6
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#tensorflow" title="Tensorflow" class="md-nav__link">
-    Tensorflow
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#predict-stream-processor" title="predict (Stream Processor)" class="md-nav__link">
-    predict (Stream Processor)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -582,16 +582,32 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/siddhi-io/siddhi-execution-tensorflow/blob/master/api/1.0.6.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/siddhi-io/siddhi-execution-tensorflow/blob/master/api/2.0.2.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v106">API Docs - v1.0.6</h1>
+                <h1 id="api-docs-v202">API Docs - v2.0.2</h1>
+<div class="admonition info">
+<p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.3</a></em></p>
+<p>It could also support other Siddhi Core minor versions.</p>
+</div>
 <h2 id="tensorflow">Tensorflow</h2>
-<h3 id="predict-stream-processor">predict <em><a target="_blank" href="https://siddhi.io/en/v4.x/docs/#stream-processor">(Stream Processor)</a></em></h3>
-<p style="word-wrap: break-word">Performs inferences (prediction) from an already built TensorFlow machine learning model. The types of models are unlimited (including image classifiers, deep learning models) as long as they satisfy the following conditions.<br>1. They are saved with the tag 'serve' in SavedModel format (See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md)<br>2. Model is initially trained and ready for inferences<br>3. Inference logic is written and saved in the model<br>4. signature_def is properly included in the metaGraphDef (a protocol buffer file which has information about the graph) and the key for prediction signature def is 'serving-default'<br><br>Also the prerequisites for inference are as follows.<br>1. User knows the names of the input and output nodes<br>2. Has a preprocessed data set of Java primitive types or their multidimensional arrays<br><br>Since each input is directly used to create a Tensor they should be of compatible shape and data type with the model.<br>The information related to input and output nodes can be retrieved from saved model signature def.signature_def can be read by using the saved_model_cli commands found at https://www.tensorflow.org/programmers_guide/saved_model<br>signature_def can be read in Python as follows<br>with tf.Session() as sess:<br>&nbsp;&nbsp;md = tf.saved_model.loader.load(sess, ['serve'], export_dir)<br>&nbsp;&nbsp;sig = md.signature_def[tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]<br>&nbsp;&nbsp;print(sig)<br><br>Or you can read signature def from Java as follows,<br>final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = "serving_default"; <br><br>final SignatureDef sig =<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MetaGraphDef.parseFrom(model.metaGraphDef())<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.getSignatureDefOrThrow(DEFAULT_SERVING_SIGNATURE_DEF_KEY);<br><br>You will have to import the following in Java.<br>import org.tensorflow.framework.MetaGraphDef;<br>import org.tensorflow.framework.SignatureDef;</p>
-
-<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>tensorFlow:predict(&lt;STRING&gt; absolute.path.to.model, &lt;STRING&gt; input.node.names, &lt;STRING&gt; output.node.names, &lt;INT|STRING|DOUBLE|LONG|FLOAT|BOOL|OBJECT&gt; attributes)
+<h3 id="predict-stream-processor">predict <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#stream-processor">(Stream Processor)</a></em></h3>
+<p><p></p>
+<p style="word-wrap: break-word;margin: 0;">Performs inferences (prediction) from an already built TensorFlow machine learning model. The types of models are unlimited (including image classifiers, deep learning models) as long as they satisfy the following conditions.<br>1. They are saved with the tag 'serve' in SavedModel format for more info see <a href="https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md">here</a>.<br>2. Model is initially trained and ready for inferences<br>3. Inference logic is written and saved in the model<br>4. signature_def is properly included in the metaGraphDef (a protocol buffer file which has information about the graph) and the key for prediction signature def is 'serving-default'<br><br>Also the prerequisites for inference are as follows.<br>1. User knows the names of the input and output nodes<br>2. Has a preprocessed data set of Java primitive types or their multidimensional arrays<br><br>Since each input is directly used to create a Tensor they should be of compatible shape and data type with the model.<br>The information related to input and output nodes can be retrieved from saved model signature def.signature_def can be read by using the saved_model_cli commands found at <a href="https://www.tensorflow.org/programmers_guide/saved_model">https://www.tensorflow.org/programmers_guide/saved_model</a>.<br>signature_def can be read in Python as follows<br></p><pre>
+with tf.Session() as sess:
+  md = tf.saved_model.loader.load(sess, ['serve'], export_dir)
+  sig = md.signature_def[tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]
+  print(sig)
+</pre><p style="word-wrap: break-word;margin: 0;"><br>Or you can read signature def from Java as follows,<br></p><pre>
+final String DEFAULT_SERVING_SIGNATURE_DEF_KEY = "serving_default";
+final SignatureDef sig =
+      MetaGraphDef.parseFrom(model.metaGraphDef())
+          .getSignatureDefOrThrow(DEFAULT_SERVING_SIGNATURE_DEF_KEY);
+</pre><p style="word-wrap: break-word;margin: 0;"><br>You will have to import the following in Java.<br><code>import org.tensorflow.framework.MetaGraphDef;</code><br><code>import org.tensorflow.framework.SignatureDef;</code></p>
+<p></p>
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>tensorFlow:predict(&lt;STRING&gt; absolute.path.to.model, &lt;STRING&gt; input.node.names, &lt;STRING&gt; output.node.names, &lt;INT|STRING|DOUBLE|LONG|FLOAT|BOOL|OBJECT&gt; attribute, &lt;INT|STRING|DOUBLE|LONG|FLOAT|BOOL|OBJECT&gt; ...)
+tensorFlow:predict(&lt;STRING&gt; absolute.path.to.model, &lt;INT|STRING|DOUBLE|LONG|FLOAT|BOOL|OBJECT&gt; attribute, &lt;INT|STRING|DOUBLE|LONG|FLOAT|BOOL|OBJECT&gt; ...)
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -606,35 +622,35 @@
     </tr>
     <tr>
         <td style="vertical-align: top">absolute.path.to.model</td>
-        <td style="vertical-align: top; word-wrap: break-word">This is the absolute path to the model folder in the local machine.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This is the absolute path to the model folder in the local machine.</p></td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">input.node.names</td>
-        <td style="vertical-align: top; word-wrap: break-word">This is a variable length parameter. The names of the input nodes as comma separated strings.</td>
-        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This is a variable length parameter. The names of the input nodes as comma separated strings.</p></td>
+        <td style="vertical-align: top">-</td>
         <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">output.node.names</td>
-        <td style="vertical-align: top; word-wrap: break-word">This is a variable length parameter. The names of the output nodes as comma separated strings.</td>
-        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This is a variable length parameter. The names of the output nodes as comma separated strings.</p></td>
+        <td style="vertical-align: top">-</td>
         <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">attributes</td>
-        <td style="vertical-align: top; word-wrap: break-word">This is a variable length parameter. These are the attributes coming with events. Note that arrays should be cast to objects and sent.</td>
+        <td style="vertical-align: top">attribute</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This is a variable length parameter. These are the attributes coming with events. Note that arrays should be cast to objects and sent.</p></td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>STRING<br>DOUBLE<br>LONG<br>FLOAT<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 <span id="extra-return-attributes" class="md-typeset" style="display: block; font-weight: bold;">Extra Return Attributes</span>
@@ -646,7 +662,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">outputs</td>
-        <td style="vertical-align: top; word-wrap: break-word">This is a variable length return attribute. The output tensors from the inference will be flattened out and sent in their primitive values. User is expected to know the shape of the output tensors if he/she wishes to reconstruct it. The shape and data type information can be retrieved from TensorFlow saved model signature_def. See the description of this extension for instructions on how to read signature_def</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">This is a variable length return attribute. The output tensors from the inference will be flattened out and sent in their primitive values. User is expected to know the shape of the output tensors if he/she wishes to reconstruct it. The shape and data type information can be retrieved from TensorFlow saved model signature_def. See the description of this extension for instructions on how to read signature_def</p></td>
         <td style="vertical-align: top">INT<br>STRING<br>DOUBLE<br>LONG<br>FLOAT<br>BOOL</td>
     </tr>
 </table></p>
@@ -660,7 +676,11 @@ insert into OutputStream;
 
 </code></pre>
 
-<p style="word-wrap: break-word">This is a query to get inferences from a MNIST model. This model takes in 2 inputs. One being the image as float array and other is keep probability array and sends out a Tensor with 10 elements. Our stream processor flattens the tensor and sends 10 floats each representing the probability of image being 0,1,...,9</p>
+<p></p>
+
+<p style="word-wrap: break-word;margin: 0;">This is a query to get inferences from a MNIST model. This model takes in 2 inputs. One being the image as float array and other is keep probability array and sends out a Tensor with 10 elements. Our stream processor flattens the tensor and sends 10 floats each representing the probability of image being 0,1,...,9</p>
+
+<p></p>
                 
                   
                 
@@ -681,7 +701,7 @@ insert into OutputStream;
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../1.0.7/" title="1.0.7" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../latest/" title="latest" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -690,19 +710,19 @@ insert into OutputStream;
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                1.0.7
+                latest
               </span>
             </div>
           </a>
         
         
-          <a href="../1.0.5/" title="1.0.5" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.0.1/" title="2.0.1" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.5
+                2.0.1
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
