@@ -184,14 +184,12 @@ public class TensorFlowExtension extends StreamProcessor<State> {
 
     @Override
     public void start() {
-
     }
 
     @Override
     public void stop() {
         //If the model learns with predictions then we need to persist the model and restore.
         //But current TensorFlow Java API r1.4 doesn't support serving of models
-
     }
 
     @Override
@@ -203,7 +201,6 @@ public class TensorFlowExtension extends StreamProcessor<State> {
 
         while (complexEventChunk.hasNext()) {
             StreamEvent streamEvent = complexEventChunk.next();
-
             Session.Runner tensorFlowRunner = tensorFlowSession.runner();
             List<Tensor> inputTensors = new LinkedList<>();
             //getting TensorFlow input values from stream event and feeding the model
@@ -232,7 +229,6 @@ public class TensorFlowExtension extends StreamProcessor<State> {
             for (Tensor t : inputTensors) {
                 t.close();
             }
-
             complexEventPopulater.populateComplexEvent(streamEvent, getOutputObjectArray(outputTensors));
         }
         nextProcessor.process(complexEventChunk);
