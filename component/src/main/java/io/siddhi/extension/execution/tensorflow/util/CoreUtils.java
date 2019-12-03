@@ -48,9 +48,7 @@ public class CoreUtils {
 
     public static VariableExpressionExecutor[] extractAndValidateTensorFlowInputs(
             ExpressionExecutor[] attributeExpressionExecutors, int startIndex, int noOfInputs) {
-
         VariableExpressionExecutor[] inputVariableExpressionExecutors = new VariableExpressionExecutor[noOfInputs];
-
         for (int i = startIndex; i < startIndex + noOfInputs; i++) {
             if (attributeExpressionExecutors[i] instanceof  VariableExpressionExecutor) {
                 inputVariableExpressionExecutors[i - startIndex] = ((VariableExpressionExecutor)
@@ -69,40 +67,31 @@ public class CoreUtils {
                                                          String[] outputNamesArray) {
         List<Attribute> attributeList = new ArrayList<>(noOfOutputs);
         for (int i = 0; i < noOfOutputs; i++) {
-
             String nodeName = signatureDef.getOutputsMap().get(outputNamesArray[i]).getName();
             String opName = nodeName.substring(0, nodeName.lastIndexOf(":"));
-
             DataType outputDataType = tensorFlowSavedModel.graph().operation(opName).output(0)
                     .dataType();
             if (outputDataType == DataType.STRING) {
                 attributeList.add(new Attribute(outputNamesArray[i], Attribute.Type.STRING));
             } else {
-
                 Shape outputShape = tensorFlowSavedModel.graph().operation(opName).output(0).shape();
                 //Finding the total number of elements
                 int numElements = 1;
-
                 for (int k = 0; k < outputShape.numDimensions(); k++) {
                     if (outputShape.size(k) == -1) {
                         continue;
                     }
                     numElements *= outputShape.size(k);
                 }
-
                 for (int j = 0; j < numElements; j++) {
                     if (outputDataType == DataType.FLOAT) {
                         attributeList.add(new Attribute(outputNamesArray[i] + j, Attribute.Type.FLOAT));
-
                     } else if (outputDataType == DataType.BOOL) {
                         attributeList.add(new Attribute(outputNamesArray[i] + j, Attribute.Type.BOOL));
-
                     } else if (outputDataType == DataType.DOUBLE) {
                         attributeList.add(new Attribute(outputNamesArray[i] + j, Attribute.Type.DOUBLE));
-
                     } else if (outputDataType == DataType.INT32 || outputDataType == DataType.UINT8) {
                         attributeList.add(new Attribute(outputNamesArray[i] + j, Attribute.Type.INT));
-
                     } else if (outputDataType == DataType.INT64) {
                         attributeList.add(new Attribute(outputNamesArray[i] + j, Attribute.Type.LONG));
                     }
@@ -114,56 +103,43 @@ public class CoreUtils {
 
     public static Object[] getOutputObjectArray(List<Tensor> outputTensorList) {
         List<Object> objectList = new LinkedList<>();
-
         for (Tensor outputTensor : outputTensorList) {
-
             DataType tensorDataType = outputTensor.dataType();
-
             if (tensorDataType == DataType.FLOAT) {
                 FloatBuffer floatBuffer = FloatBuffer.allocate(outputTensor.numElements());
                 outputTensor.writeTo(floatBuffer);
                 float[] floatArray = floatBuffer.array();
-
                 for (float value : floatArray) {
                     objectList.add(value);
                 }
-
             } else if (tensorDataType == DataType.DOUBLE) {
                 DoubleBuffer doubleBuffer = DoubleBuffer.allocate(outputTensor.numElements());
                 outputTensor.writeTo(doubleBuffer);
                 double[] doubleArray = doubleBuffer.array();
-
                 for (double value : doubleArray) {
                     objectList.add(value);
                 }
-
             } else if (tensorDataType == DataType.INT32) {
                 IntBuffer intBuffer = IntBuffer.allocate(outputTensor.numElements());
                 outputTensor.writeTo(intBuffer);
                 int[] intArray = intBuffer.array();
-
                 for (int value : intArray) {
                     objectList.add(value);
                 }
-
             } else if (tensorDataType == DataType.INT64) {
                 LongBuffer longBuffer = LongBuffer.allocate(outputTensor.numElements());
                 outputTensor.writeTo(longBuffer);
                 long[] longArray = longBuffer.array();
-
                 for (long value : longArray) {
                     objectList.add(value);
                 }
-
             } else {
                 ByteBuffer byteBuffer = ByteBuffer.allocate(outputTensor.numBytes());
                 outputTensor.writeTo(byteBuffer);
                 byte[] byteArray = byteBuffer.array();
-
                 if (tensorDataType == DataType.STRING) {
                     String recoveredString = new String(byteArray, StandardCharsets.UTF_8);
                     objectList.add(recoveredString);
-
                 } else if (tensorDataType == DataType.UINT8) {
                     for (byte value : byteArray) {
                         objectList.add((int) value);
@@ -189,7 +165,6 @@ public class CoreUtils {
     public static long[] getShapeOfArrayAsString(String arrayAsString) {
         arrayAsString = arrayAsString.substring(arrayAsString.lastIndexOf(":") + 1);
         int noDims = 0;
-
         for (int i = 0; i < arrayAsString.length(); i++) {
             if (arrayAsString.charAt(i) == ' ') {
                 continue;
@@ -201,34 +176,27 @@ public class CoreUtils {
         }
 
         long[] shape = new long[noDims];
-
         Stack bracketStack = new Stack();
         Stack countStack = new Stack();
 
         for (int i = 0; i < arrayAsString.length(); i++) {
-
             if (arrayAsString.charAt(i) == '[') {
                 bracketStack.push("[");
                 countStack.push(0);
-
             } else if (arrayAsString.charAt(i) == ',') {
                 int tempNum = (int) countStack.pop();
                 countStack.push(tempNum + 1);
-
             } else if (arrayAsString.charAt(i) == ']') {
                 int tempSize = (int) countStack.pop();
                 tempSize = tempSize + 1;
                 bracketStack.pop();
-
                 if (shape[bracketStack.size()] == 0) {
                     shape[bracketStack.size()] = tempSize;
-
                 } else if (!(shape[bracketStack.size()] == tempSize)) {
                     throw new SiddhiAppRuntimeException("Array size is inconsistent");
                 }
             }
         }
-
         return shape;
     }
 
@@ -246,7 +214,6 @@ public class CoreUtils {
         String[] stringArray = arrayAsString.split(" ");
 
         List tempList = new LinkedList();
-
         for (String string : stringArray) {
             if (string != null && (!string.isEmpty())) {
                 tempList.add(string);
@@ -259,19 +226,15 @@ public class CoreUtils {
                 case "float":
                     tensor = Tensor.create(Float.parseFloat((String) tempList.get(0)));
                     return tensor;
-
                 case "int":
                     tensor = Tensor.create(Integer.parseInt((String) tempList.get(0)));
                     return tensor;
-
                 case "double":
                     tensor = Tensor.create(Double.parseDouble((String) tempList.get(0)));
                     return tensor;
-
                 case "long":
                     tensor = Tensor.create(Long.parseLong((String) tempList.get(0)));
                     return tensor;
-
                 default:
                     throw new SiddhiAppRuntimeException("Number encoded as String should have one of int, " +
                             "long, float, double as prefix but given " + dataType);
